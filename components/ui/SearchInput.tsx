@@ -89,8 +89,8 @@ export const SearchInput: React.FC<SearchInputProps> = ({ onFocus, onBlur }) => 
 
         <JellyButton
           type="button"
-          flashColor="bg-black/15"
-          className="h-[40px] px-5 btn-send-white flex items-center justify-center shrink-0 rounded-full"
+          flashColor="bg-white/20"
+          className="h-[40px] px-5 btn-send-accent flex items-center justify-center shrink-0 rounded-full"
         >
           <img
             src="/send.png"
