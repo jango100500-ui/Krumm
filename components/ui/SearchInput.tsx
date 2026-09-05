@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { JellyButton } from "@/components/ui/JellyButton";
 
 const textVariants = {
   initial: {
@@ -18,6 +19,12 @@ const textVariants = {
   },
 };
 
+interface Ripple {
+  x: number;
+  y: number;
+  id: number;
+}
+
 interface SearchInputProps {
   onFocus?: () => void;
   onBlur?: () => void;
@@ -25,36 +32,58 @@ interface SearchInputProps {
 
 export const SearchInput: React.FC<SearchInputProps> = ({ onFocus, onBlur }) => {
   const [value, setValue] = useState("");
-  const [isBarAnimated, setIsBarAnimated] = useState(false);
-  const [isBtnAnimated, setIsBtnAnimated] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
+  const [ripples, setRipples] = useState<Ripple[]>([]);
+  const barRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const placeholder = "Давайте планировать…";
 
-  const triggerBarJelly = () => {
-    setIsBarAnimated(false);
-    requestAnimationFrame(() => {
-      setIsBarAnimated(true);
-      setTimeout(() => setIsBarAnimated(false), 380);
-    });
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+
+    setIsPressed(true);
+    if (barRef.current) {
+      const rect = barRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const newRipple = { x, y, id: Date.now() };
+
+      setRipples((prev) => [...prev, newRipple]);
+
+      setTimeout(() => {
+        setRipples((prev) => prev.filter((r) => r.id !== newRipple.id));
+      }, 380);
+    }
   };
 
-  const triggerBtnJelly = (e: React.PointerEvent) => {
-    e.stopPropagation();
-    setIsBtnAnimated(false);
-    requestAnimationFrame(() => {
-      setIsBtnAnimated(true);
-      setTimeout(() => setIsBtnAnimated(false), 380);
-    });
+  const handlePointerUp = () => {
+    setIsPressed(false);
   };
 
   return (
     <div className="w-full flex items-center h-12 relative">
-      <div 
-        onPointerDown={triggerBarJelly}
-        className={`flex-1 h-full mt-glass rounded-full flex items-center justify-between pr-1 pl-5 relative z-10 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-transform duration-200 cursor-text ${
-          isBarAnimated ? "animate-jelly-bar" : ""
+      <div
+        ref={barRef}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+        className={`flex-1 h-full mt-glass rounded-full flex items-center justify-between pr-1 pl-5 relative z-10 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)] select-none cursor-text ${
+          isPressed ? "jelly-active" : "jelly-idle"
         }`}
       >
+        {ripples.map((ripple) => (
+          <span
+            key={ripple.id}
+            className="absolute rounded-full pointer-events-none animate-ripple bg-white/20"
+            style={{
+              left: `${ripple.x}px`,
+              top: `${ripple.y}px`,
+              width: "80px",
+              height: "80px",
+            }}
+          />
+        ))}
+
         <div className="relative flex-1 h-full flex items-center mr-2">
           <AnimatePresence mode="wait">
             {value === "" && (
@@ -83,19 +112,17 @@ export const SearchInput: React.FC<SearchInputProps> = ({ onFocus, onBlur }) => 
           />
         </div>
 
-        <button 
+        <JellyButton
           type="button"
-          onPointerDown={triggerBtnJelly}
-          className={`h-[40px] px-5 btn-send-white flex items-center justify-center shrink-0 rounded-full cursor-pointer ${
-            isBtnAnimated ? "animate-jelly-btn" : "active:scale-95"
-          }`}
+          flashColor="bg-black/15"
+          className="h-[40px] px-5 btn-send-white flex items-center justify-center shrink-0 rounded-full"
         >
-          <img 
-            src="/send.png" 
-            alt="Send" 
-            className="w-[15px] h-[15px] object-contain pointer-events-none" 
+          <img
+            src="/send.png"
+            alt="Send"
+            className="w-[15px] h-[15px] object-contain pointer-events-none"
           />
-        </button>
+        </JellyButton>
       </div>
     </div>
   );
