@@ -204,8 +204,62 @@ export default function Home() {
                 : '10px'
             }}
           >
-            <div className="w-full max-w-[420px] mx-auto pointer-events-auto">
+            <div className="w-full max-w-[420px] mx-auto flex flex-col gap-2.5 pointer-events-auto">
               <SearchInput onFocus={handleInputFocus} onBlur={handleInputBlur} />
+
+              {keyboardHeight === 0 && (
+                <div className="w-full mt-glass rounded-[28px] p-4 flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.3)] select-none">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="px-3 py-1 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
+                      <span className="text-white text-[12px] font-semibold tracking-tight">
+                        Ближайшее
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="flex items-center gap-1 text-white/45 hover:text-white/75 transition-colors cursor-pointer"
+                    >
+                      <span className="text-[13px] font-medium tracking-tight">
+                        Смотреть все
+                      </span>
+                      <img
+                        src="/right.png"
+                        alt="All"
+                        className="w-3.5 h-3.5 object-contain brightness-0 invert opacity-45 pointer-events-none"
+                      />
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <span className="text-white/60 text-[12px] font-medium tracking-tight mb-2">
+                      Сегодня, 8 Сентября
+                    </span>
+
+                    <div className="flex flex-col relative">
+                      <div className="flex items-center justify-between">
+                        <span className="text-white text-[13px] font-semibold tracking-tight">
+                          09:00-15:00
+                        </span>
+                        <span className="text-white/90 text-[13px] font-medium tracking-tight">
+                          Пары
+                        </span>
+                      </div>
+
+                      <div className="w-[1.5px] h-3.5 bg-white/20 ml-2 my-0.5" />
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-white/75 text-[13px] font-semibold tracking-tight">
+                          16:00-17:30
+                        </span>
+                        <span className="text-white/75 text-[13px] font-medium tracking-tight">
+                          Немецкий
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </>
