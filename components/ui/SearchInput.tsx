@@ -18,7 +18,12 @@ const textVariants = {
   },
 };
 
-export const SearchInput = () => {
+interface SearchInputProps {
+  onFocus?: () => void;
+  onBlur?: () => void;
+}
+
+export const SearchInput: React.FC<SearchInputProps> = ({ onFocus, onBlur }) => {
   const [value, setValue] = useState("");
   const placeholder = "Давайте планировать…";
 
@@ -46,6 +51,8 @@ export const SearchInput = () => {
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
+            onFocus={onFocus}
+            onBlur={onBlur}
             className="bg-transparent border-none outline-none text-white text-[16px] w-full font-medium relative z-10 tracking-tight"
           />
         </div>
