@@ -111,10 +111,10 @@ export const TopTabBar: React.FC<TopTabBarProps> = ({ activeTab, onTabChange }) 
   }, [activeTab]);
 
   return (
-    <div className="w-[200px] h-11 bg-black/40 border border-white/20 backdrop-blur-2xl rounded-full p-[4px] flex gap-[4px] shadow-[0_10px_35px_rgba(0,0,0,0.25)] relative select-none">
+    <div className="w-[200px] h-11 mt-glass rounded-full p-[4px] flex gap-[4px] shadow-sm relative select-none">
       <div
         ref={sliderRef}
-        className="absolute top-[4px] bottom-[4px] left-0 rounded-full bg-white/25 border border-white/30 z-0 pointer-events-none origin-center will-change-transform transition-colors duration-150 shadow-sm"
+        className="absolute top-[4px] bottom-[4px] left-0 rounded-full bg-white/20 border border-white/25 z-0 pointer-events-none origin-center will-change-transform transition-colors duration-150 shadow-sm"
       />
 
       <button
@@ -123,7 +123,7 @@ export const TopTabBar: React.FC<TopTabBarProps> = ({ activeTab, onTabChange }) 
         onClick={() => onTabChange("chat")}
         className="flex-1 h-full rounded-full text-[13px] font-semibold flex items-center justify-center relative z-10 outline-none tap-highlight-transparent cursor-pointer"
       >
-        <span className={`transition-colors duration-200 ${activeTab === "chat" ? "text-white" : "text-white/60"}`}>
+        <span className={`transition-colors duration-200 ${activeTab === "chat" ? "text-white" : "text-white/50"}`}>
           Чат
         </span>
       </button>
@@ -134,7 +134,7 @@ export const TopTabBar: React.FC<TopTabBarProps> = ({ activeTab, onTabChange }) 
         onClick={() => onTabChange("calendar")}
         className="flex-1 h-full rounded-full text-[13px] font-semibold flex items-center justify-center relative z-10 outline-none tap-highlight-transparent cursor-pointer"
       >
-        <span className={`transition-colors duration-200 ${activeTab === "calendar" ? "text-white" : "text-white/60"}`}>
+        <span className={`transition-colors duration-200 ${activeTab === "calendar" ? "text-white" : "text-white/50"}`}>
           Календарь
         </span>
       </button>
