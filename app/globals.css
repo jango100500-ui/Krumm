@@ -4,7 +4,7 @@
 
 :root {
   --glass-blur: blur(40px) saturate(180%);
-  --glass-border: 0.5px solid rgba(255, 255, 255, 0.12);
+  --glass-border: 0.85px solid rgba(255, 255, 255, 0.15);
   --glass-bg: rgba(255, 255, 255, 0.1);
   --hub-bg: #0a0a0a;
 }
@@ -34,6 +34,15 @@ html, body {
   color: #ffffff;
   -webkit-font-smoothing: antialiased;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 input {
