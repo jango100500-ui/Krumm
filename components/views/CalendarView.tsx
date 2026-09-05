@@ -90,7 +90,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                     <div
                       className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
                         isSelected
-                          ? "bg-white text-black font-bold shadow-md scale-105"
+                          ? "bg-[#FF453A] text-white font-bold shadow-[0_2px_12px_rgba(255,69,58,0.4)] scale-105"
                           : "text-white font-medium hover:bg-white/10"
                       }`}
                     >
@@ -145,16 +145,23 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="w-full h-full overflow-y-auto scroll-y-touch px-5 pb-[calc(env(safe-area-inset-bottom,20px)+40px)]"
             >
               <div className="w-full max-w-[420px] mx-auto flex flex-col gap-4 relative pt-1">
-                <div className="w-full flex items-start gap-3">
-                  <span className="text-[12px] font-semibold text-white/40 tracking-tight pt-1 w-10 flex-shrink-0">
-                    09:00
-                  </span>
+                
+                <div className="w-full flex items-stretch gap-3">
+                  <div className="w-11 flex flex-col justify-between items-end flex-shrink-0 py-1 select-none">
+                    <span className="text-[12px] font-semibold text-white/70 tracking-tight leading-none">
+                      09:00
+                    </span>
+                    <div className="w-[1.5px] flex-1 bg-white/15 my-1.5 rounded-full" />
+                    <span className="text-[12px] font-semibold text-white/35 tracking-tight leading-none">
+                      15:00
+                    </span>
+                  </div>
 
-                  <div className="flex-1 rounded-[26px] bg-white/[0.09] border border-white/10 backdrop-blur-[40px] p-4 flex flex-col gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.25)]">
+                  <div className="flex-1 rounded-[26px] bg-[rgba(255,69,58,0.07)] border border-[rgba(255,69,58,0.18)] backdrop-blur-[40px] p-4 flex flex-col gap-3 shadow-[0_8px_32px_rgba(255,69,58,0.12)]">
                     <div className="flex items-start justify-between">
                       <div className="flex flex-col">
                         <span className="text-white text-[16px] font-bold tracking-tight leading-tight">
@@ -182,14 +189,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                           <span className="text-white text-[13px] font-semibold tracking-tight">
                             Есть дополнительные задачи
                           </span>
-                          <div className="w-5 h-5 rounded-full bg-[#F5F2EA] text-[#141416] font-bold text-[11px] flex items-center justify-center shadow-sm">
+                          <div className="w-5 h-5 rounded-full bg-[#FF453A] text-white font-bold text-[11px] flex items-center justify-center shadow-sm">
                             {subtasks.length}
                           </div>
                         </div>
 
                         <motion.svg
                           animate={{ rotate: isSubtasksOpen ? 180 : 0 }}
-                          transition={{ duration: 0.25, ease: "easeInOut" }}
+                          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                           className="w-4 h-4 text-white/50"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -210,7 +217,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                             className="overflow-hidden flex flex-col gap-2 pt-3"
                           >
                             {subtasks.map((st) => (
@@ -222,13 +229,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                                 <div
                                   className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors duration-200 flex-shrink-0 ${
                                     st.completed
-                                      ? "bg-white border-white text-black"
+                                      ? "bg-[#FF453A] border-[#FF453A] text-white"
                                       : "border-white/30 bg-white/5"
                                   }`}
                                 >
                                   {st.completed && (
                                     <svg
-                                      className="w-3 h-3 text-black stroke-[3]"
+                                      className="w-3 h-3 text-white stroke-[3]"
                                       fill="none"
                                       viewBox="0 0 24 24"
                                       stroke="currentColor"
@@ -260,10 +267,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                   </div>
                 </div>
 
-                <div className="w-full flex items-start gap-3">
-                  <span className="text-[12px] font-semibold text-white/40 tracking-tight pt-3.5 w-10 flex-shrink-0">
-                    15:00
-                  </span>
+                <div className="w-full flex items-stretch gap-3">
+                  <div className="w-11 flex flex-col justify-between items-end flex-shrink-0 py-1 select-none">
+                    <span className="text-[12px] font-semibold text-white/70 tracking-tight leading-none">
+                      15:10
+                    </span>
+                    <div className="w-[1.5px] flex-1 bg-white/15 my-1.5 rounded-full" />
+                    <span className="text-[12px] font-semibold text-white/35 tracking-tight leading-none">
+                      15:40
+                    </span>
+                  </div>
 
                   <div className="flex-1 rounded-[26px] mt-glass p-4 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
                     <div className="flex flex-col">
@@ -280,13 +293,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                       onClick={() => setIsStandaloneTaskDone(!isStandaloneTaskDone)}
                       className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors duration-200 cursor-pointer ${
                         isStandaloneTaskDone
-                          ? "bg-white border-white text-black"
+                          ? "bg-[#FF453A] border-[#FF453A] text-white"
                           : "border-white/30 bg-white/5"
                       }`}
                     >
                       {isStandaloneTaskDone && (
                         <svg
-                          className="w-3.5 h-3.5 text-black stroke-[3]"
+                          className="w-3.5 h-3.5 text-white stroke-[3]"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -302,10 +315,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                   </div>
                 </div>
 
-                <div className="w-full flex items-start gap-3">
-                  <span className="text-[12px] font-semibold text-white/40 tracking-tight pt-3.5 w-10 flex-shrink-0">
-                    17:00
-                  </span>
+                <div className="w-full flex items-stretch gap-3">
+                  <div className="w-11 flex flex-col justify-between items-end flex-shrink-0 py-1 select-none">
+                    <span className="text-[12px] font-semibold text-white/70 tracking-tight leading-none">
+                      17:00
+                    </span>
+                    <div className="w-[1.5px] flex-1 bg-white/15 my-1.5 rounded-full" />
+                    <span className="text-[12px] font-semibold text-white/35 tracking-tight leading-none">
+                      18:30
+                    </span>
+                  </div>
 
                   <div className="flex-1 rounded-[26px] mt-glass p-4 flex items-center shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
                     <span className="text-white/80 text-[14px] font-medium tracking-tight">
@@ -314,10 +333,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                   </div>
                 </div>
 
-                <div className="w-full flex items-start gap-3">
-                  <span className="text-[12px] font-semibold text-white/40 tracking-tight pt-3.5 w-10 flex-shrink-0">
-                    19:00
-                  </span>
+                <div className="w-full flex items-stretch gap-3">
+                  <div className="w-11 flex flex-col justify-between items-end flex-shrink-0 py-1 select-none">
+                    <span className="text-[12px] font-semibold text-white/70 tracking-tight leading-none">
+                      19:00
+                    </span>
+                    <div className="w-[1.5px] flex-1 bg-white/15 my-1.5 rounded-full" />
+                    <span className="text-[12px] font-semibold text-white/35 tracking-tight leading-none">
+                      20:00
+                    </span>
+                  </div>
 
                   <div className="flex-1 rounded-[26px] mt-glass p-4 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
                     <div className="flex flex-col">
@@ -338,7 +363,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                 </div>
 
                 <div className="w-full flex items-start gap-3 mt-1">
-                  <span className="text-[12px] font-semibold text-white/40 tracking-tight pt-3.5 w-10 flex-shrink-0">
+                  <span className="text-[12px] font-semibold text-white/40 tracking-tight pt-3.5 w-11 flex-shrink-0 text-right">
                     21:00
                   </span>
 
@@ -364,7 +389,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               ref={scrollGridRef}
               className="w-full h-full overflow-y-auto scroll-y-touch px-5 pb-[calc(env(safe-area-inset-bottom,20px)+40px)]"
             >
@@ -397,7 +422,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
 
                     <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.09] border border-white/10 backdrop-blur-[40px] p-2.5 flex flex-col justify-start shadow-sm overflow-hidden"
+                        className="absolute left-1 right-1 rounded-[18px] bg-[rgba(255,69,58,0.07)] border border-[rgba(255,69,58,0.18)] backdrop-blur-[40px] p-2.5 flex flex-col justify-start shadow-sm overflow-hidden"
                         style={{ top: "468px", height: "312px" }}
                       >
                         <span className="text-[12px] font-bold text-white tracking-tight leading-tight">
