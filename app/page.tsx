@@ -6,39 +6,31 @@ import { JellyButton } from '@/components/ui/JellyButton';
 import { SearchInput } from '@/components/ui/SearchInput';
 
 export default function Home() {
-  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState('100vh');
   const [isInputActive, setIsInputActive] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Жестко привязываем размер страницы к реальному видимому окну (сжимается над клавиатурой)
   useEffect(() => {
-    const handleScrollReset = () => {
-      window.scrollTo(0, 0);
-    };
-
-    const handleViewport = () => {
-      window.scrollTo(0, 0);
+    const updateVv = () => {
       if (window.visualViewport) {
-        const vv = window.visualViewport;
-        const offset = window.innerHeight - (vv.height + vv.offsetTop);
-        setKeyboardOffset(Math.max(0, offset));
+        setViewportHeight(`${window.visualViewport.height}px`);
+        window.scrollTo(0, 0);
       }
     };
 
-    window.addEventListener('scroll', handleScrollReset);
-    window.visualViewport?.addEventListener('resize', handleViewport);
-    window.visualViewport?.addEventListener('scroll', handleScrollReset);
+    window.visualViewport?.addEventListener('resize', updateVv);
+    window.visualViewport?.addEventListener('scroll', updateVv);
+    updateVv();
 
     const handleGesture = (e: TouchEvent) => {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
+      if (e.touches.length > 1) e.preventDefault();
     };
     document.addEventListener('touchstart', handleGesture, { passive: false });
 
     return () => {
-      window.removeEventListener('scroll', handleScrollReset);
-      window.visualViewport?.removeEventListener('resize', handleViewport);
-      window.visualViewport?.removeEventListener('scroll', handleScrollReset);
+      window.visualViewport?.removeEventListener('resize', updateVv);
+      window.visualViewport?.removeEventListener('scroll', updateVv);
       document.removeEventListener('touchstart', handleGesture);
     };
   }, []);
@@ -74,11 +66,13 @@ export default function Home() {
     }, 240);
   };
 
-  const isKeyboardOpen = keyboardOffset > 30;
-
   return (
-    <main className="fixed inset-0 w-full h-[100vh] bg-[#0a0a0a] overflow-hidden">
+    <main 
+      className="fixed top-0 left-0 w-full overflow-hidden bg-[#141416]"
+      style={{ height: viewportHeight }}
+    >
       
+      {/* Деликатный блюр фона при активной строке ввода */}
       {isInputActive && (
         <div
           onClick={() => {
@@ -86,13 +80,14 @@ export default function Home() {
               document.activeElement.blur();
             }
           }}
-          className="fixed inset-0 z-15 bg-black/40 backdrop-blur-md transition-opacity duration-300 pointer-events-auto"
+          className="absolute inset-0 z-15 bg-black/10 backdrop-blur-md transition-opacity duration-300 pointer-events-auto"
         />
       )}
 
+      {/* Меню (привязано к верху через vh, не уедет при открытии клавиатуры) */}
       <div 
-        className={`fixed left-0 right-0 px-5 z-20 flex justify-start items-center pointer-events-none transition-all duration-300 ${
-          isInputActive ? 'opacity-30 blur-[4px]' : 'opacity-100 blur-none'
+        className={`absolute left-0 right-0 px-5 z-20 flex justify-start items-center pointer-events-none transition-all duration-300 ${
+          isInputActive ? 'opacity-40 blur-[4px]' : 'opacity-100 blur-none'
         }`}
         style={{ top: 'calc(env(safe-area-inset-top, 44px) + 14px)' }}
       >
@@ -109,14 +104,15 @@ export default function Home() {
         </JellyButton>
       </div>
 
+      {/* Идеи (привязаны к высоте экрана через vh, остаются на месте как влитые) */}
       <div 
-        className={`fixed left-1/2 -translate-x-1/2 -translate-y-[56%] w-full max-w-[420px] px-5 z-10 pointer-events-none transition-all duration-300 ${
-          isInputActive ? 'opacity-30 blur-[8px]' : 'opacity-100 blur-none'
+        className={`absolute left-1/2 -translate-x-1/2 w-full max-w-[420px] px-5 z-10 pointer-events-none transition-all duration-300 ${
+          isInputActive ? 'opacity-40 blur-[8px]' : 'opacity-100 blur-none'
         }`}
-        style={{ top: '50%' }}
+        style={{ top: '24vh' }}
       >
         <div className="w-full flex flex-col items-start pointer-events-auto">
-          <h2 className="text-white text-[19.6px] font-bold tracking-tight mb-3 px-1 text-left">
+          <h2 className="text-white text-[20px] font-bold tracking-tight mb-3 px-1 text-left">
             Идеи, которые вдохновляют
           </h2>
 
@@ -129,7 +125,7 @@ export default function Home() {
                 <motion.div
                   animate={{
                     filter: isRefreshing ? 'blur(8px)' : 'blur(0px)',
-                    opacity: isRefreshing ? 0.15 : 1,
+                    opacity: isRefreshing ? 0.2 : 1,
                     scale: isRefreshing ? 0.98 : 1,
                   }}
                   transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
@@ -174,13 +170,10 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Строка ввода (привязана к низу физического контейнера, автоматически выталкивается клавиатурой) */}
       <div 
-        className="fixed left-0 right-0 px-5 z-30 pointer-events-none transition-[bottom] duration-150 ease-out"
-        style={{ 
-          bottom: isKeyboardOpen 
-            ? `${keyboardOffset + 8}px` 
-            : 'calc(env(safe-area-inset-bottom, 20px) + 8px)'
-        }}
+        className="absolute bottom-0 left-0 right-0 px-5 z-30 pointer-events-none"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 12px)' }}
       >
         <div className="w-full max-w-[420px] mx-auto pointer-events-auto">
           <SearchInput onFocusChange={setIsInputActive} />
