@@ -13,10 +13,14 @@ export default function Home() {
   const [isInputActive, setIsInputActive] = useState(false);
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [dragProgress, setDragProgress] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingPlate, setIsDraggingPlate] = useState(false);
+
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isSwipingPage, setIsSwipingPage] = useState(false);
 
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const touchStartY = useRef<number | null>(null);
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const gestureLock = useRef<'horizontal' | 'vertical' | null>(null);
 
   const measureKeyboard = () => {
     const vv = window.visualViewport;
@@ -53,16 +57,79 @@ export default function Home() {
     }
   };
 
-  const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    touchStartY.current = clientY;
-    setIsDragging(true);
+  const handlePageTouchStart = (e: React.TouchEvent) => {
+    if (keyboardHeight > 0 || isInputActive) return;
+    touchStartPos.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
+    gestureLock.current = null;
   };
 
-  const handleTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
-    if (touchStartY.current === null) return;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const deltaY = touchStartY.current - clientY;
+  const handlePageTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartPos.current) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const deltaX = currentX - touchStartPos.current.x;
+    const deltaY = currentY - touchStartPos.current.y;
+
+    if (!gestureLock.current) {
+      if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          gestureLock.current = 'horizontal';
+          setIsSwipingPage(true);
+        } else {
+          gestureLock.current = 'vertical';
+        }
+      }
+    }
+
+    if (gestureLock.current === 'horizontal') {
+      if (activeTab === 'chat') {
+        const clamped = Math.min(0, Math.max(-window.innerWidth, deltaX));
+        setSwipeOffset(clamped);
+      } else {
+        const clamped = Math.max(0, Math.min(window.innerWidth, deltaX));
+        setSwipeOffset(clamped);
+      }
+    }
+  };
+
+  const handlePageTouchEnd = () => {
+    if (gestureLock.current === 'horizontal') {
+      setIsSwipingPage(false);
+      const threshold = window.innerWidth * 0.25;
+
+      if (activeTab === 'chat') {
+        if (swipeOffset < -threshold) {
+          setActiveTab('calendar');
+        }
+      } else {
+        if (swipeOffset > threshold) {
+          setActiveTab('chat');
+        }
+      }
+      setSwipeOffset(0);
+    }
+
+    touchStartPos.current = null;
+    gestureLock.current = null;
+  };
+
+  const handlePlateTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    touchStartPos.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
+    setIsDraggingPlate(true);
+  };
+
+  const handlePlateTouchMove = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    if (!touchStartPos.current) return;
+    const currentY = e.touches[0].clientY;
+    const deltaY = touchStartPos.current.y - currentY;
 
     if (!isScheduleOpen) {
       const progress = Math.max(0, Math.min(1, deltaY / 130));
@@ -73,10 +140,11 @@ export default function Home() {
     }
   };
 
-  const handleTouchEnd = () => {
-    if (touchStartY.current === null) return;
-    setIsDragging(false);
-    touchStartY.current = null;
+  const handlePlateTouchEnd = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    if (!touchStartPos.current) return;
+    setIsDraggingPlate(false);
+    touchStartPos.current = null;
 
     if (!isScheduleOpen) {
       if (dragProgress > 0.32) {
@@ -96,10 +164,10 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (!isDragging) {
+    if (!isDraggingPlate) {
       setDragProgress(isScheduleOpen ? 1 : 0);
     }
-  }, [isScheduleOpen, isDragging]);
+  }, [isScheduleOpen, isDraggingPlate]);
 
   useEffect(() => {
     const resetFocusState = () => {
@@ -178,12 +246,18 @@ export default function Home() {
   ];
 
   const isBlurred = isInputActive || keyboardHeight > 0;
-  const currentHeight = dragProgress * 138;
-  const plateBlur = (1 - dragProgress) * 4;
+  const currentPlateHeight = dragProgress * 138;
+  const currentPlateBlur = (1 - dragProgress) * 3;
+
+  const currentTranslateX = activeTab === 'chat' ? swipeOffset : -window.innerWidth + swipeOffset;
 
   return (
-    <main className="fixed inset-0 w-full h-[100dvh] bg-[#0a0a0a] overflow-hidden">
-      
+    <main
+      onTouchStart={handlePageTouchStart}
+      onTouchMove={handlePageTouchMove}
+      onTouchEnd={handlePageTouchEnd}
+      className="fixed inset-0 w-full h-[100dvh] bg-[#0a0a0a] overflow-hidden select-none"
+    >
       {isBlurred && (
         <div
           onClick={handleDismiss}
@@ -191,33 +265,45 @@ export default function Home() {
         />
       )}
 
-      <div 
+      <div
         className={`fixed left-0 right-0 px-5 z-20 flex items-center pointer-events-none transition-all duration-300 ${
           isBlurred ? 'opacity-30 blur-[6px]' : 'opacity-100 blur-none'
         }`}
         style={{ top: 'calc(env(safe-area-inset-top, 44px) + 14px)' }}
       >
-        <JellyButton
-          type="button"
-          flashColor="bg-white/10"
-          className="w-11 h-11 rounded-full mt-glass flex items-center justify-center shadow-sm pointer-events-auto"
+        <div
+          className={`transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            activeTab === 'calendar' ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100 pointer-events-auto'
+          }`}
         >
-          <img
-            src="/menu.png"
-            alt="Menu"
-            className="w-5 h-5 object-contain brightness-0 invert opacity-75 pointer-events-none"
-          />
-        </JellyButton>
+          <JellyButton
+            type="button"
+            flashColor="bg-white/10"
+            className="w-11 h-11 rounded-full mt-glass flex items-center justify-center shadow-sm"
+          >
+            <img
+              src="/menu.png"
+              alt="Menu"
+              className="w-5 h-5 object-contain brightness-0 invert opacity-75 pointer-events-none"
+            />
+          </JellyButton>
+        </div>
 
         <div className="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
           <TopTabBar activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       </div>
 
-      {activeTab === 'chat' && (
-        <>
-          <div 
-            className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[420px] px-5 z-10 pointer-events-none transition-all duration-300 ${
+      <div
+        className="w-[200vw] h-full flex will-change-transform"
+        style={{
+          transform: `translateX(${currentTranslateX}px)`,
+          transition: isSwipingPage ? 'none' : 'transform 400ms cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+      >
+        <div className="w-[100vw] h-full relative overflow-hidden flex flex-col justify-between flex-shrink-0">
+          <div
+            className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[420px] px-5 z-10 pointer-events-none transition-all duration-300 ${
               isBlurred ? 'opacity-30 blur-[8px]' : 'opacity-100 blur-none'
             }`}
           >
@@ -252,12 +338,10 @@ export default function Home() {
             </div>
           </div>
 
-          <div 
-            className="fixed left-0 right-0 px-5 z-30 pointer-events-none transition-[bottom] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
-            style={{ 
-              bottom: keyboardHeight > 0 
-                ? `${keyboardHeight + 6}px` 
-                : '8px'
+          <div
+            className="absolute left-0 right-0 px-5 z-30 pointer-events-none transition-[bottom] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            style={{
+              bottom: keyboardHeight > 0 ? `${keyboardHeight + 6}px` : '8px',
             }}
           >
             <div className="w-full max-w-[420px] mx-auto flex flex-col pointer-events-auto">
@@ -266,18 +350,15 @@ export default function Home() {
               {keyboardHeight === 0 && (
                 <>
                   <div
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onMouseDown={handleTouchStart}
-                    onMouseMove={handleTouchMove}
-                    onMouseUp={handleTouchEnd}
+                    onTouchStart={handlePlateTouchStart}
+                    onTouchMove={handlePlateTouchMove}
+                    onTouchEnd={handlePlateTouchEnd}
                     className="w-full overflow-hidden select-none"
                     style={{
-                      height: `${currentHeight}px`,
+                      height: `${currentPlateHeight}px`,
                       opacity: dragProgress,
-                      filter: `blur(${plateBlur}px)`,
-                      transition: isDragging ? 'none' : 'all 350ms cubic-bezier(0.16, 1, 0.3, 1)',
+                      filter: `blur(${currentPlateBlur}px)`,
+                      transition: isDraggingPlate ? 'none' : 'all 380ms cubic-bezier(0.16, 1, 0.3, 1)',
                       marginTop: dragProgress > 0.05 ? '8px' : '0px',
                     }}
                   >
@@ -289,6 +370,7 @@ export default function Home() {
 
                         <button
                           type="button"
+                          onClick={() => setActiveTab('calendar')}
                           className="flex items-center gap-1.5 text-white/45 hover:text-white/75 transition-colors cursor-pointer"
                         >
                           <span className="text-[13px] font-medium tracking-tight">
@@ -331,26 +413,23 @@ export default function Home() {
                   </div>
 
                   <div
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onMouseDown={handleTouchStart}
-                    onMouseMove={handleTouchMove}
-                    onMouseUp={handleTouchEnd}
+                    onTouchStart={handlePlateTouchStart}
+                    onTouchMove={handlePlateTouchMove}
+                    onTouchEnd={handlePlateTouchEnd}
                     className="w-full h-8 px-2 flex justify-center items-center cursor-grab active:cursor-grabbing select-none relative"
                   >
                     <AnimatePresence mode="wait">
                       <motion.span
-                        key={isScheduleOpen ? "open-hint" : "closed-hint"}
-                        initial={{ opacity: 0, filter: "blur(4px)" }}
-                        animate={{ opacity: 1, filter: "blur(0px)" }}
-                        exit={{ opacity: 0, filter: "blur(4px)" }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        key={isScheduleOpen ? 'open-hint' : 'closed-hint'}
+                        initial={{ opacity: 0, filter: 'blur(4px)' }}
+                        animate={{ opacity: 1, filter: 'blur(0px)' }}
+                        exit={{ opacity: 0, filter: 'blur(4px)' }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
                         className="absolute inset-0 flex items-center justify-center text-white/35 text-[11px] font-medium text-center tracking-tight leading-tight pointer-events-none px-3"
                       >
                         {isScheduleOpen
-                          ? "Теперь потяните сверху вниз, чтобы вернуть чат в привычный вид"
-                          : "Потяните снизу вверх чтобы быстро посмотреть свои ближайшие планы"}
+                          ? 'Теперь потяните сверху вниз, чтобы вернуть чат в привычный вид'
+                          : 'Потяните снизу вверх чтобы быстро посмотреть свои ближайшие планы'}
                       </motion.span>
                     </AnimatePresence>
                   </div>
@@ -358,13 +437,12 @@ export default function Home() {
               )}
             </div>
           </div>
-        </>
-      )}
+        </div>
 
-      {activeTab === 'calendar' && (
-        <CalendarView />
-      )}
-
+        <div className="w-[100vw] h-full relative overflow-hidden flex-shrink-0">
+          <CalendarView />
+        </div>
+      </div>
     </main>
   );
 }
