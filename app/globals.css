@@ -3,35 +3,62 @@
 @tailwind utilities;
 
 :root {
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
+  --glass-blur: blur(40px) saturate(180%);
+  --glass-border: 0.5px solid rgba(255, 255, 255, 0.12);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --hub-bg: #0a0a0a;
 }
 
 * {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
   box-sizing: border-box;
 }
 
+*::-webkit-scrollbar {
+  display: none;
+}
+
 html, body {
-  overflow: hidden;
-  overscroll-behavior: none;
-  touch-action: none;
-  height: 100dvh;
+  margin: 0;
+  padding: 0;
   width: 100vw;
+  height: 100vh;
+  overflow: hidden; 
   position: fixed;
   inset: 0;
-  background-color: #141416;
+  background-color: var(--hub-bg);
   color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
 }
 
 input {
   user-select: auto;
   -webkit-user-select: auto;
+}
+
+.mt-glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+}
+
+.btn-send-white {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+  display: flex !important;
+  visibility: visible !important;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+}
+
+.btn-send-white img {
+  filter: brightness(0) !important;
+  opacity: 1 !important;
 }
 
 @keyframes flash-ripple {
