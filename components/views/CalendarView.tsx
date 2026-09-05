@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SubTask {
@@ -14,6 +14,21 @@ interface CalendarViewProps {
   onToggleMode: () => void;
 }
 
+const HOURS_24 = Array.from(
+  { length: 24 },
+  (_, i) => `${String(i).padStart(2, "0")}:00`
+);
+
+const WEEK_DAYS = [
+  { name: "пн", day: 8 },
+  { name: "вт", day: 9 },
+  { name: "ср", day: 10 },
+  { name: "чт", day: 11 },
+  { name: "пт", day: 12 },
+  { name: "сб", day: 13 },
+  { name: "вс", day: 14 },
+];
+
 export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
   const [selectedDay, setSelectedDay] = useState<number>(8);
   const [isSubtasksOpen, setIsSubtasksOpen] = useState<boolean>(true);
@@ -25,106 +40,115 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
     { id: "3", title: "Купить тетрадь", completed: false },
   ]);
 
+  const scrollGridRef = useRef<HTMLDivElement>(null);
+  const headerScrollRef = useRef<HTMLDivElement>(null);
+  const bodyScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (mode === "week" && scrollGridRef.current) {
+      scrollGridRef.current.scrollTop = 8 * 52 - 16;
+    }
+  }, [mode]);
+
   const toggleSubtask = (id: string) => {
     setSubtasks((prev) =>
       prev.map((st) => (st.id === id ? { ...st, completed: !st.completed } : st))
     );
   };
 
-  const weekDays = [
-    { name: "пн", day: 8 },
-    { name: "вт", day: 9 },
-    { name: "ср", day: 10 },
-    { name: "чт", day: 11 },
-    { name: "пт", day: 12 },
-    { name: "сб", day: 13 },
-    { name: "вс", day: 14 },
-  ];
-
-  const hours = [
-    "08:00",
-    "09:00",
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-    "18:00",
-    "19:00",
-    "20:00",
-    "21:00",
-  ];
+  const handleBodyHorizontalScroll = () => {
+    if (bodyScrollRef.current && headerScrollRef.current) {
+      headerScrollRef.current.scrollLeft = bodyScrollRef.current.scrollLeft;
+    }
+  };
 
   return (
-    <div className="w-full h-full flex flex-col pt-[calc(env(safe-area-inset-top,44px)+66px)] select-none">
-      <div className="w-full max-w-[420px] mx-auto px-5 flex-shrink-0">
-        <div className="w-full flex items-center mb-3">
-          <div
-            className={`transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              mode === "week" ? "w-10 flex-shrink-0" : "w-0"
-            }`}
-          />
-          <div className="flex-1 grid grid-cols-7 gap-1">
-            {weekDays.map((item) => {
-              const isSelected = item.day === selectedDay;
-              return (
-                <button
-                  key={item.day}
-                  type="button"
-                  onClick={() => setSelectedDay(item.day)}
-                  className="flex flex-col items-center gap-1 py-1 outline-none cursor-pointer"
-                >
-                  <span className="text-[11px] font-semibold text-white/40 tracking-tight">
-                    {item.name}
-                  </span>
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
-                      isSelected
-                        ? "bg-white text-black font-bold shadow-md scale-105"
-                        : "text-white font-medium hover:bg-white/10"
-                    }`}
+    <div className="w-full h-full flex flex-col pt-[calc(env(safe-area-inset-top,44px)+66px)] select-none overflow-hidden">
+      
+      <div className="w-full max-w-[420px] mx-auto px-5 flex-shrink-0 z-10 pb-2">
+        {mode === "day" ? (
+          <>
+            <div className="w-full grid grid-cols-7 gap-1 mb-3">
+              {WEEK_DAYS.map((item) => {
+                const isSelected = item.day === selectedDay;
+                return (
+                  <button
+                    key={item.day}
+                    type="button"
+                    onClick={() => setSelectedDay(item.day)}
+                    className="flex flex-col items-center gap-1 py-1 outline-none cursor-pointer"
                   >
-                    <span className="text-[14px] leading-none">{item.day}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+                    <span className="text-[11px] font-semibold text-white/40 tracking-tight">
+                      {item.name}
+                    </span>
+                    <div
+                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
+                        isSelected
+                          ? "bg-white text-black font-bold shadow-md scale-105"
+                          : "text-white font-medium hover:bg-white/10"
+                      }`}
+                    >
+                      <span className="text-[14px] leading-none">{item.day}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
 
-        {mode === "day" && (
-          <div className="w-full flex items-center justify-between mb-3 px-1">
-            <span className="text-white text-[16px] font-bold tracking-tight">
-              Понедельник, 8 сентября
-            </span>
-            <span className="text-white/40 text-[13px] font-medium tracking-tight">
-              Сегодня
-            </span>
+            <div className="w-full flex items-center justify-between px-1">
+              <span className="text-white text-[16px] font-bold tracking-tight">
+                Понедельник, 8 сентября
+              </span>
+              <span className="text-white/40 text-[13px] font-medium tracking-tight">
+                Сегодня
+              </span>
+            </div>
+          </>
+        ) : (
+          <div className="w-full flex items-center">
+            <div className="w-12 flex-shrink-0" />
+            <div
+              ref={headerScrollRef}
+              className="flex-1 overflow-hidden scrollbar-none"
+            >
+              <div className="flex gap-2 w-max pr-4">
+                {WEEK_DAYS.map((item) => (
+                  <div
+                    key={item.day}
+                    className="w-[72px] flex flex-col items-center gap-1 py-1 pointer-events-none"
+                  >
+                    <span className="text-[11px] font-semibold text-white/40 tracking-tight uppercase">
+                      {item.name}
+                    </span>
+                    <span className="text-[14px] font-semibold text-white/80 leading-none">
+                      {item.day}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto scroll-y-touch px-5 pb-[calc(env(safe-area-inset-bottom,20px)+30px)]">
-        <div className="w-full max-w-[420px] mx-auto">
-          <AnimatePresence mode="wait">
-            {mode === "day" ? (
-              <motion.div
-                key="day-view"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="w-full flex flex-col gap-4 relative"
-              >
+      <div className="flex-1 w-full overflow-hidden relative">
+        <AnimatePresence mode="wait">
+          {mode === "day" ? (
+            <motion.div
+              key="day-view"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full h-full overflow-y-auto scroll-y-touch px-5 pb-[calc(env(safe-area-inset-bottom,20px)+40px)]"
+            >
+              <div className="w-full max-w-[420px] mx-auto flex flex-col gap-4 relative pt-1">
                 <div className="w-full flex items-start gap-3">
                   <span className="text-[12px] font-semibold text-white/40 tracking-tight pt-1 w-10 flex-shrink-0">
                     09:00
                   </span>
 
-                  <div className="flex-1 rounded-[26px] bg-white/[0.13] border border-white/25 backdrop-blur-[40px] p-4 flex flex-col gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+                  <div className="flex-1 rounded-[26px] bg-white/[0.09] border border-white/10 backdrop-blur-[40px] p-4 flex flex-col gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.25)]">
                     <div className="flex items-start justify-between">
                       <div className="flex flex-col">
                         <span className="text-white text-[16px] font-bold tracking-tight leading-tight">
@@ -135,7 +159,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                         </span>
                       </div>
 
-                      <div className="px-3 py-1 rounded-full bg-[#2C2C2E] flex items-center justify-center shadow-sm">
+                      <div className="px-3 py-1 rounded-full bg-[#28282A] flex items-center justify-center shadow-sm">
                         <span className="text-white/90 text-[11px] font-semibold tracking-tight">
                           В приоритете
                         </span>
@@ -299,7 +323,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                       </span>
                     </div>
 
-                    <div className="px-3 py-1 rounded-full bg-[#2C2C2E] flex items-center justify-center shadow-sm">
+                    <div className="px-3 py-1 rounded-full bg-[#28282A] flex items-center justify-center shadow-sm">
                       <span className="text-white/90 text-[11px] font-semibold tracking-tight">
                         В приоритете
                       </span>
@@ -326,148 +350,158 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                     </span>
                   </button>
                 </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="week-view"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="w-full flex flex-col relative"
-              >
-                <div className="w-full flex relative">
-                  <div className="w-10 flex flex-col flex-shrink-0">
-                    {hours.map((hour) => (
-                      <div
-                        key={hour}
-                        className="h-12 text-[11px] font-medium text-white/40 flex items-start tracking-tight"
-                      >
-                        {hour}
-                      </div>
-                    ))}
-                  </div>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="week-view"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              ref={scrollGridRef}
+              className="w-full h-full overflow-y-auto scroll-y-touch px-5 pb-[calc(env(safe-area-inset-bottom,20px)+40px)]"
+            >
+              <div className="w-full max-w-[420px] mx-auto flex items-start">
+                <div className="w-12 flex flex-col flex-shrink-0 z-10">
+                  {HOURS_24.map((hour) => (
+                    <div
+                      key={hour}
+                      className="h-[52px] text-[11px] font-semibold text-white/35 flex items-start tracking-tight"
+                    >
+                      {hour}
+                    </div>
+                  ))}
+                </div>
 
-                  <div className="flex-1 relative h-[672px] grid grid-cols-7 border-l border-white/[0.06]">
+                <div
+                  ref={bodyScrollRef}
+                  onScroll={handleBodyHorizontalScroll}
+                  className="flex-1 overflow-x-auto scrollbar-none"
+                >
+                  <div className="relative h-[1248px] flex gap-2 w-max pr-4 border-l border-white/[0.06]">
                     <div className="absolute inset-0 flex flex-col pointer-events-none">
-                      {hours.map((hour) => (
-                        <div key={hour} className="h-12 border-b border-white/[0.06] w-full" />
+                      {HOURS_24.map((hour) => (
+                        <div
+                          key={hour}
+                          className="h-[52px] border-b border-white/[0.05] w-full"
+                        />
                       ))}
                     </div>
 
-                    <div className="col-start-1 col-span-1 relative h-full">
+                    <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-0.5 right-0.5 rounded-[16px] mt-glass p-2 flex flex-col justify-start border border-white/20 shadow-sm"
-                        style={{ top: "48px", height: "288px" }}
+                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.09] border border-white/10 backdrop-blur-[40px] p-2.5 flex flex-col justify-start shadow-sm"
+                        style={{ top: "468px", height: "312px" }}
                       >
-                        <span className="text-[11px] font-bold text-white tracking-tight leading-tight">
+                        <span className="text-[12px] font-bold text-white tracking-tight leading-tight">
                           Пары
                         </span>
-                        <span className="text-[9px] font-medium text-white/60 mt-0.5 tracking-tight">
-                          09:00 — 15:00
+                        <span className="text-[10px] font-medium text-white/60 mt-1 tracking-tight">
+                          09:00–15:00
                         </span>
                       </div>
                     </div>
 
-                    <div className="col-start-2 col-span-1 relative h-full">
+                    <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-0.5 right-0.5 rounded-[16px] bg-white/[0.05] border border-white/10 p-1.5 flex flex-col justify-center"
-                        style={{ top: "528px", height: "48px" }}
+                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.06] border border-white/10 p-2 flex flex-col justify-center shadow-sm"
+                        style={{ top: "988px", height: "52px" }}
                       >
-                        <span className="text-[10px] font-semibold text-white tracking-tight leading-tight">
+                        <span className="text-[11px] font-semibold text-white tracking-tight leading-tight">
                           Немецкий
                         </span>
-                        <span className="text-[8px] text-white/50">19:00</span>
+                        <span className="text-[9px] text-white/50 mt-0.5">19:00</span>
                       </div>
                     </div>
 
-                    <div className="col-start-3 col-span-1 relative h-full">
+                    <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-0.5 right-0.5 rounded-[16px] mt-glass p-2 flex flex-col justify-start border border-white/20 shadow-sm"
-                        style={{ top: "48px", height: "288px" }}
+                        className="absolute left-1 right-1 rounded-[18px] mt-glass p-2.5 flex flex-col justify-start border border-white/10 shadow-sm"
+                        style={{ top: "468px", height: "312px" }}
                       >
-                        <span className="text-[11px] font-bold text-white tracking-tight leading-tight">
+                        <span className="text-[12px] font-bold text-white tracking-tight leading-tight">
                           Пары
                         </span>
-                        <span className="text-[9px] font-medium text-white/60 mt-0.5 tracking-tight">
-                          09:00 — 15:00
+                        <span className="text-[10px] font-medium text-white/60 mt-1 tracking-tight">
+                          09:00–15:00
                         </span>
                       </div>
                     </div>
 
-                    <div className="col-start-4 col-span-1 relative h-full">
+                    <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-0.5 right-0.5 rounded-[16px] mt-glass p-2 flex flex-col justify-start border border-white/20 shadow-sm"
-                        style={{ top: "48px", height: "288px" }}
+                        className="absolute left-1 right-1 rounded-[18px] mt-glass p-2.5 flex flex-col justify-start border border-white/10 shadow-sm"
+                        style={{ top: "468px", height: "312px" }}
                       >
-                        <span className="text-[11px] font-bold text-white tracking-tight leading-tight">
+                        <span className="text-[12px] font-bold text-white tracking-tight leading-tight">
                           Пары
                         </span>
-                        <span className="text-[9px] font-medium text-white/60 mt-0.5 tracking-tight">
-                          09:00 — 15:00
+                        <span className="text-[10px] font-medium text-white/60 mt-1 tracking-tight">
+                          09:00–15:00
                         </span>
                       </div>
 
                       <div
-                        className="absolute left-0.5 right-0.5 rounded-[16px] bg-white/[0.06] border border-white/10 p-1.5 flex flex-col justify-center"
-                        style={{ top: "480px", height: "46px" }}
+                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.06] border border-white/10 p-2 flex flex-col justify-center shadow-sm"
+                        style={{ top: "936px", height: "52px" }}
                       >
-                        <span className="text-[10px] font-semibold text-white tracking-tight leading-tight truncate">
+                        <span className="text-[11px] font-semibold text-white tracking-tight leading-tight truncate">
                           Тренировка
                         </span>
-                        <span className="text-[8px] text-white/50">18:00</span>
+                        <span className="text-[9px] text-white/50 mt-0.5">18:00</span>
                       </div>
 
                       <div
-                        className="absolute left-0.5 right-0.5 rounded-[16px] bg-white/[0.05] border border-white/10 p-1.5 flex flex-col justify-center"
-                        style={{ top: "528px", height: "48px" }}
+                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.06] border border-white/10 p-2 flex flex-col justify-center shadow-sm"
+                        style={{ top: "988px", height: "52px" }}
                       >
-                        <span className="text-[10px] font-semibold text-white tracking-tight leading-tight">
+                        <span className="text-[11px] font-semibold text-white tracking-tight leading-tight">
                           Немецкий
                         </span>
-                        <span className="text-[8px] text-white/50">19:00</span>
+                        <span className="text-[9px] text-white/50 mt-0.5">19:00</span>
                       </div>
                     </div>
 
-                    <div className="col-start-5 col-span-1 relative h-full">
+                    <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-0.5 right-0.5 rounded-[16px] mt-glass p-2 flex flex-col justify-start border border-white/20 shadow-sm"
-                        style={{ top: "48px", height: "288px" }}
+                        className="absolute left-1 right-1 rounded-[18px] mt-glass p-2.5 flex flex-col justify-start border border-white/10 shadow-sm"
+                        style={{ top: "468px", height: "312px" }}
                       >
-                        <span className="text-[11px] font-bold text-white tracking-tight leading-tight">
+                        <span className="text-[12px] font-bold text-white tracking-tight leading-tight">
                           Пары
                         </span>
-                        <span className="text-[9px] font-medium text-white/60 mt-0.5 tracking-tight">
-                          09:00 — 15:00
+                        <span className="text-[10px] font-medium text-white/60 mt-1 tracking-tight">
+                          09:00–15:00
                         </span>
                       </div>
                     </div>
 
-                    <div className="col-start-6 col-span-1 relative h-full">
+                    <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-0.5 right-0.5 rounded-[16px] bg-white/[0.08] border border-white/15 p-1.5 flex flex-col justify-start"
-                        style={{ top: "288px", height: "96px" }}
+                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.08] border border-white/10 p-2.5 flex flex-col justify-start shadow-sm"
+                        style={{ top: "728px", height: "104px" }}
                       >
-                        <span className="text-[10px] font-semibold text-white tracking-tight leading-tight">
+                        <span className="text-[11px] font-semibold text-white tracking-tight leading-tight">
                           Встреча с Машей
                         </span>
-                        <span className="text-[8px] text-white/50 mt-0.5">14:00</span>
+                        <span className="text-[9px] text-white/50 mt-1">14:00</span>
                       </div>
                     </div>
 
-                    <div className="col-start-7 col-span-1 relative h-full" />
+                    <div className="w-[72px] relative h-full flex-shrink-0" />
                   </div>
                 </div>
+              </div>
 
-                <div className="w-full py-5 flex items-center justify-center cursor-pointer">
-                  <span className="text-[13px] font-medium text-white/45 hover:text-white/70 transition-colors tracking-tight">
-                    + ещё 7 задач на неделе
-                  </span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+              <div className="w-full py-6 flex items-center justify-center cursor-pointer">
+                <span className="text-[13px] font-medium text-white/45 hover:text-white/70 transition-colors tracking-tight">
+                  + ещё 7 задач на неделе
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
