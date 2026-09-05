@@ -6,31 +6,33 @@ import { JellyButton } from '@/components/ui/JellyButton';
 import { SearchInput } from '@/components/ui/SearchInput';
 
 export default function Home() {
-  const [viewportHeight, setViewportHeight] = useState('100vh');
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
   const [isInputActive, setIsInputActive] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Жестко привязываем размер страницы к реальному видимому окну (сжимается над клавиатурой)
+  // Новая, железобетонная механика сдвига от клавиатуры
   useEffect(() => {
-    const updateVv = () => {
+    const updateKeyboard = () => {
       if (window.visualViewport) {
-        setViewportHeight(`${window.visualViewport.height}px`);
+        // Разница между физическим окном браузера и видимой зоной = высота клавиатуры
+        const offset = window.innerHeight - window.visualViewport.height;
+        setKeyboardOffset(Math.max(0, offset));
         window.scrollTo(0, 0);
       }
     };
 
-    window.visualViewport?.addEventListener('resize', updateVv);
-    window.visualViewport?.addEventListener('scroll', updateVv);
-    updateVv();
+    window.visualViewport?.addEventListener('resize', updateKeyboard);
+    window.visualViewport?.addEventListener('scroll', updateKeyboard);
 
+    // Запрет зума пальцами
     const handleGesture = (e: TouchEvent) => {
       if (e.touches.length > 1) e.preventDefault();
     };
     document.addEventListener('touchstart', handleGesture, { passive: false });
 
     return () => {
-      window.visualViewport?.removeEventListener('resize', updateVv);
-      window.visualViewport?.removeEventListener('scroll', updateVv);
+      window.visualViewport?.removeEventListener('resize', updateKeyboard);
+      window.visualViewport?.removeEventListener('scroll', updateKeyboard);
       document.removeEventListener('touchstart', handleGesture);
     };
   }, []);
@@ -67,12 +69,9 @@ export default function Home() {
   };
 
   return (
-    <main 
-      className="fixed top-0 left-0 w-full overflow-hidden bg-[#141416]"
-      style={{ height: viewportHeight }}
-    >
+    <main className="fixed inset-0 w-full h-[100dvh] overflow-hidden bg-[var(--hub-bg)]">
       
-      {/* Деликатный блюр фона при активной строке ввода */}
+      {/* Чистый блюр (без черной заливки) при открытии клавиатуры */}
       {isInputActive && (
         <div
           onClick={() => {
@@ -80,34 +79,34 @@ export default function Home() {
               document.activeElement.blur();
             }
           }}
-          className="absolute inset-0 z-15 bg-black/10 backdrop-blur-md transition-opacity duration-300 pointer-events-auto"
+          className="absolute inset-0 z-15 backdrop-blur-md transition-all duration-300 pointer-events-auto bg-transparent"
         />
       )}
 
-      {/* Меню (привязано к верху через vh, не уедет при открытии клавиатуры) */}
+      {/* Меню */}
       <div 
         className={`absolute left-0 right-0 px-5 z-20 flex justify-start items-center pointer-events-none transition-all duration-300 ${
-          isInputActive ? 'opacity-40 blur-[4px]' : 'opacity-100 blur-none'
+          isInputActive ? 'opacity-30 blur-[4px]' : 'opacity-100 blur-none'
         }`}
         style={{ top: 'calc(env(safe-area-inset-top, 44px) + 14px)' }}
       >
         <JellyButton
           type="button"
-          flashColor="bg-white/10"
-          className="w-11 h-11 rounded-full mt-glass flex items-center justify-center shadow-sm pointer-events-auto"
+          flashColor="bg-white/20"
+          className="w-11 h-11 rounded-full mt-glass flex items-center justify-center pointer-events-auto"
         >
           <img
             src="/menu.png"
             alt="Menu"
-            className="w-5 h-5 object-contain brightness-0 invert opacity-75 pointer-events-none"
+            className="w-5 h-5 object-contain brightness-0 invert opacity-90 pointer-events-none"
           />
         </JellyButton>
       </div>
 
-      {/* Идеи (привязаны к высоте экрана через vh, остаются на месте как влитые) */}
+      {/* Центральный блок идей */}
       <div 
         className={`absolute left-1/2 -translate-x-1/2 w-full max-w-[420px] px-5 z-10 pointer-events-none transition-all duration-300 ${
-          isInputActive ? 'opacity-40 blur-[8px]' : 'opacity-100 blur-none'
+          isInputActive ? 'opacity-30 blur-[8px]' : 'opacity-100 blur-none'
         }`}
         style={{ top: '24vh' }}
       >
@@ -120,7 +119,7 @@ export default function Home() {
             {ideas.map((item) => (
               <div
                 key={item.id}
-                className="w-full h-[116px] rounded-[24px] mt-glass p-3 flex flex-col justify-between shadow-sm cursor-pointer active:scale-[0.97] transition-transform"
+                className="w-full h-[116px] rounded-[24px] mt-glass p-3 flex flex-col justify-between cursor-pointer active:scale-[0.97] transition-transform"
               >
                 <motion.div
                   animate={{
@@ -142,7 +141,7 @@ export default function Home() {
                     </span>
                   </div>
 
-                  <p className="text-white/50 text-[11px] font-normal leading-snug tracking-tight text-left">
+                  <p className="text-white/60 text-[11px] font-normal leading-snug tracking-tight text-left">
                     {item.text}
                   </p>
                 </motion.div>
@@ -154,15 +153,15 @@ export default function Home() {
             <JellyButton
               type="button"
               onClick={handleRefreshIdeas}
-              flashColor="bg-white/10"
-              className="h-8 px-3.5 rounded-full mt-glass flex items-center gap-1.5 shadow-sm"
+              flashColor="bg-white/20"
+              className="h-8 px-3.5 rounded-full mt-glass flex items-center gap-1.5"
             >
               <img
                 src="/refresh.png"
                 alt="Refresh"
-                className="w-3 h-3 object-contain brightness-0 invert opacity-80 pointer-events-none"
+                className="w-3 h-3 object-contain brightness-0 invert opacity-90 pointer-events-none"
               />
-              <span className="text-white/80 text-[12px] font-medium tracking-tight">
+              <span className="text-white/90 text-[12px] font-medium tracking-tight">
                 Обновить идеи
               </span>
             </JellyButton>
@@ -170,10 +169,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Строка ввода (привязана к низу физического контейнера, автоматически выталкивается клавиатурой) */}
+      {/* Строка ввода (теперь двигается плавно через transform) */}
       <div 
-        className="absolute bottom-0 left-0 right-0 px-5 z-30 pointer-events-none"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 12px)' }}
+        className="absolute bottom-0 left-0 right-0 px-5 z-30 pointer-events-none transition-transform duration-150 ease-out"
+        style={{ 
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 16px) + 8px)',
+          transform: `translateY(-${keyboardOffset}px)`
+        }}
       >
         <div className="w-full max-w-[420px] mx-auto pointer-events-auto">
           <SearchInput onFocusChange={setIsInputActive} />
