@@ -116,7 +116,7 @@ export default function Home() {
     gestureLock.current = null;
   };
 
-  const handlePlateTouchStart = (e: React.TouchEvent) => {
+  const handleBottomTouchStart = (e: React.TouchEvent) => {
     e.stopPropagation();
     touchStartPos.current = {
       x: e.touches[0].clientX,
@@ -125,11 +125,15 @@ export default function Home() {
     setIsDraggingPlate(true);
   };
 
-  const handlePlateTouchMove = (e: React.TouchEvent) => {
+  const handleBottomTouchMove = (e: React.TouchEvent) => {
     e.stopPropagation();
     if (!touchStartPos.current) return;
     const currentY = e.touches[0].clientY;
     const deltaY = touchStartPos.current.y - currentY;
+
+    if (Math.abs(deltaY) > 8 && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
 
     if (!isScheduleOpen) {
       const progress = Math.max(0, Math.min(1, deltaY / 130));
@@ -140,7 +144,7 @@ export default function Home() {
     }
   };
 
-  const handlePlateTouchEnd = (e: React.TouchEvent) => {
+  const handleBottomTouchEnd = (e: React.TouchEvent) => {
     e.stopPropagation();
     if (!touchStartPos.current) return;
     setIsDraggingPlate(false);
@@ -344,15 +348,17 @@ export default function Home() {
               bottom: keyboardHeight > 0 ? `${keyboardHeight + 6}px` : '8px',
             }}
           >
-            <div className="w-full max-w-[420px] mx-auto flex flex-col pointer-events-auto">
+            <div
+              onTouchStart={handleBottomTouchStart}
+              onTouchMove={handleBottomTouchMove}
+              onTouchEnd={handleBottomTouchEnd}
+              className="w-full max-w-[420px] mx-auto flex flex-col pointer-events-auto select-none"
+            >
               <SearchInput onFocus={handleInputFocus} onBlur={handleInputBlur} />
 
               {keyboardHeight === 0 && (
                 <>
                   <div
-                    onTouchStart={handlePlateTouchStart}
-                    onTouchMove={handlePlateTouchMove}
-                    onTouchEnd={handlePlateTouchEnd}
                     className="w-full overflow-hidden select-none"
                     style={{
                       height: `${currentPlateHeight}px`,
@@ -412,12 +418,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div
-                    onTouchStart={handlePlateTouchStart}
-                    onTouchMove={handlePlateTouchMove}
-                    onTouchEnd={handlePlateTouchEnd}
-                    className="w-full h-8 px-2 flex justify-center items-center cursor-grab active:cursor-grabbing select-none relative"
-                  >
+                  <div className="w-full h-8 px-2 flex justify-center items-center cursor-grab active:cursor-grabbing select-none relative">
                     <AnimatePresence mode="wait">
                       <motion.span
                         key={isScheduleOpen ? 'open-hint' : 'closed-hint'}
