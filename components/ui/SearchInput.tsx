@@ -25,16 +25,17 @@ export const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
 
   useEffect(() => {
     if (textareaRef.current) {
-      // Сбрасываем высоту до базовой перед замером, чтобы строка могла сдуваться
+      // Сброс высоты для возможности "сдутия" при стирании
       textareaRef.current.style.height = "22px";
       const scrollH = textareaRef.current.scrollHeight;
+      // 22px = 1 строка, 88px = 4 строки
       const targetH = Math.min(Math.max(scrollH, 22), 88);
       textareaRef.current.style.height = `${targetH}px`;
     }
   }, [value]);
 
   return (
-    <div className="w-full flex items-end mt-glass rounded-[26px] py-2 pr-2 pl-5 relative z-10 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.15)] transition-[border-radius] duration-200">
+    <div className="w-full flex items-end mt-glass rounded-[26px] py-2 pr-2 pl-5 relative z-10 transition-[border-radius] duration-200">
       <div className="relative flex-1 min-h-[36px] flex items-center mr-2 py-1">
         <AnimatePresence mode="wait">
           {value === "" && (
@@ -45,7 +46,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({ onFocusChange }) => {
               animate="animate"
               exit="exit"
               transition={{ duration: 0.2, ease: "backOut" }}
-              className="absolute left-0 top-[7px] text-white/30 font-medium text-[15px] pointer-events-none whitespace-nowrap tracking-tight"
+              className="absolute left-0 top-[7px] text-white/40 font-medium text-[15px] pointer-events-none whitespace-nowrap tracking-tight"
             >
               {placeholder}
             </motion.span>
