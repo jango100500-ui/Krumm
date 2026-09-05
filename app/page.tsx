@@ -3,8 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { JellyButton } from '@/components/ui/JellyButton';
 import { SearchInput } from '@/components/ui/SearchInput';
+import { TopTabBar, TabType } from '@/components/ui/TopTabBar';
+import { CalendarView } from '@/components/views/CalendarView';
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<TabType>('chat');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isInputActive, setIsInputActive] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -133,7 +136,7 @@ export default function Home() {
       )}
 
       <div 
-        className={`fixed left-0 right-0 px-5 z-10 flex justify-start items-center pointer-events-none transition-all duration-300 ${
+        className={`fixed left-0 right-0 px-5 z-20 flex items-center pointer-events-none transition-all duration-300 ${
           isBlurred ? 'opacity-30 blur-[6px]' : 'opacity-100 blur-none'
         }`}
         style={{ top: 'calc(env(safe-area-inset-top, 44px) + 14px)' }}
@@ -149,56 +152,68 @@ export default function Home() {
             className="w-5 h-5 object-contain brightness-0 invert opacity-75 pointer-events-none"
           />
         </JellyButton>
+
+        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
+          <TopTabBar activeTab={activeTab} onTabChange={setActiveTab} />
+        </div>
       </div>
 
-      <div 
-        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[420px] px-5 z-10 pointer-events-none transition-all duration-300 ${
-          isBlurred ? 'opacity-30 blur-[8px]' : 'opacity-100 blur-none'
-        }`}
-      >
-        <div className="w-full flex flex-col items-start pointer-events-auto">
-          <h2 className="text-white text-[19px] font-bold tracking-tight mb-3 px-1 text-left">
-            Идеи, которые вдохновляют
-          </h2>
+      {activeTab === 'chat' && (
+        <>
+          <div 
+            className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[420px] px-5 z-10 pointer-events-none transition-all duration-300 ${
+              isBlurred ? 'opacity-30 blur-[8px]' : 'opacity-100 blur-none'
+            }`}
+          >
+            <div className="w-full flex flex-col items-start pointer-events-auto">
+              <h2 className="text-white text-[19px] font-bold tracking-tight mb-3 px-1 text-left">
+                Идеи, которые вдохновляют
+              </h2>
 
-          <div className="w-full grid grid-cols-2 gap-2.5">
-            {ideas.map((item) => (
-              <div
-                key={item.id}
-                className="w-full h-[116px] rounded-[24px] mt-glass p-3 flex flex-col justify-start gap-1.5 shadow-sm cursor-pointer active:scale-[0.97] transition-transform"
-              >
-                <div className="w-full flex items-center gap-1.5">
-                  <img
-                    src="/idea.png"
-                    alt="Idea"
-                    className="w-4 h-4 object-contain brightness-0 invert opacity-90 shrink-0 pointer-events-none"
-                  />
-                  <span className="text-white text-[13px] font-bold tracking-tight leading-tight flex-1 text-left">
-                    {item.title}
-                  </span>
-                </div>
+              <div className="w-full grid grid-cols-2 gap-2.5">
+                {ideas.map((item) => (
+                  <div
+                    key={item.id}
+                    className="w-full h-[116px] rounded-[24px] mt-glass p-3 flex flex-col justify-start gap-1.5 shadow-sm cursor-pointer active:scale-[0.97] transition-transform"
+                  >
+                    <div className="w-full flex items-center gap-1.5">
+                      <img
+                        src="/idea.png"
+                        alt="Idea"
+                        className="w-4 h-4 object-contain brightness-0 invert opacity-90 shrink-0 pointer-events-none"
+                      />
+                      <span className="text-white text-[13px] font-bold tracking-tight leading-tight flex-1 text-left">
+                        {item.title}
+                      </span>
+                    </div>
 
-                <p className="text-white/50 text-[11px] font-normal leading-snug tracking-tight text-left">
-                  {item.text}
-                </p>
+                    <p className="text-white/50 text-[11px] font-normal leading-snug tracking-tight text-left">
+                      {item.text}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div 
-        className="fixed left-0 right-0 px-5 z-30 pointer-events-none transition-[bottom] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        style={{ 
-          bottom: keyboardHeight > 0 
-            ? `${keyboardHeight + 6}px` 
-            : '10px'
-        }}
-      >
-        <div className="w-full max-w-[420px] mx-auto pointer-events-auto">
-          <SearchInput onFocus={handleInputFocus} onBlur={handleInputBlur} />
-        </div>
-      </div>
+          <div 
+            className="fixed left-0 right-0 px-5 z-30 pointer-events-none transition-[bottom] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            style={{ 
+              bottom: keyboardHeight > 0 
+                ? `${keyboardHeight + 6}px` 
+                : '10px'
+            }}
+          >
+            <div className="w-full max-w-[420px] mx-auto pointer-events-auto">
+              <SearchInput onFocus={handleInputFocus} onBlur={handleInputBlur} />
+            </div>
+          </div>
+        </>
+      )}
+
+      {activeTab === 'calendar' && (
+        <CalendarView />
+      )}
 
     </main>
   );
