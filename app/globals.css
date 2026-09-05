@@ -1,98 +1,104 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+"use client";
 
-:root {
-  --glass-blur: blur(40px) saturate(180%);
-  --glass-border: 0.5px solid rgba(255, 255, 255, 0.12);
-  --glass-bg: rgba(26, 26, 28, 0.8);
-  --hub-bg: #0a0a0a;
-  --accent-red: #FF453A;
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { JellyButton } from "@/components/ui/JellyButton";
+
+const textVariants = {
+  initial: {
+    opacity: 0,
+    y: 12,
+  },
+  animate: {
+    opacity: 1,
+    y: 0,
+  },
+  exit: {
+    opacity: 0,
+    y: -12,
+  },
+};
+
+interface SearchInputProps {
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
-* {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
+export const SearchInput: React.FC<SearchInputProps> = ({ onFocus, onBlur }) => {
+  const [value, setValue] = useState("");
+  const [isEditable, setIsEditable] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const placeholder = "Давайте планировать…";
 
-*::-webkit-scrollbar {
-  display: none;
-}
+  useEffect(() => {
+    if (document.activeElement instanceof HTMLInputElement) {
+      document.activeElement.blur();
+    }
+  }, []);
 
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden; 
-  position: fixed;
-  inset: 0;
-  background-color: var(--hub-bg);
-  color: #ffffff;
-  -webkit-font-smoothing: antialiased;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
-  touch-action: none;
-  overscroll-behavior: none;
-}
+  const handlePointerDown = () => {
+    setIsEditable(true);
+  };
 
-img {
-  pointer-events: none;
-  -webkit-user-drag: none;
-  user-select: none;
-}
+  const handleFocus = () => {
+    setIsEditable(true);
+    onFocus?.();
+  };
 
-input {
-  user-select: text;
-  -webkit-user-select: text;
-}
+  const handleBlur = () => {
+    setIsEditable(false);
+    onBlur?.();
+  };
 
-.mt-glass {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-border);
-}
+  return (
+    <div className="w-full flex items-center h-12 relative">
+      <div className="flex-1 h-full mt-glass rounded-full flex items-center justify-between pr-1 pl-5 relative z-10 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)] select-none cursor-text">
+        <div className="relative flex-1 h-full flex items-center mr-2">
+          <AnimatePresence mode="wait">
+            {value === "" && (
+              <motion.span
+                key={placeholder}
+                variants={textVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.2, ease: "backOut" }}
+                className="absolute left-0 text-white/30 font-medium text-[16px] pointer-events-none whitespace-nowrap tracking-tight"
+              >
+                {placeholder}
+              </motion.span>
+            )}
+          </AnimatePresence>
 
-.btn-send-accent {
-  background-color: var(--accent-red) !important;
-  opacity: 1 !important;
-  display: flex !important;
-  visibility: visible !important;
-  box-shadow: 0 4px 16px rgba(255, 69, 58, 0.35);
-}
+          <input
+            ref={inputRef}
+            type="text"
+            readOnly={!isEditable}
+            autoFocus={false}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onPointerDown={handlePointerDown}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            className="bg-transparent border-none outline-none text-white text-[16px] w-full font-medium relative z-10 tracking-tight"
+          />
+        </div>
 
-.btn-send-accent img {
-  filter: brightness(0) invert(1) !important;
-  opacity: 1 !important;
-}
-
-@keyframes flash-ripple {
-  0% {
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(3.5);
-    opacity: 0;
-  }
-}
-
-.animate-ripple {
-  animation: flash-ripple 0.35s ease-out forwards;
-}
-
-.jelly-active {
-  transform: scale(0.95);
-  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.jelly-idle {
-  transform: scale(1);
-  transition: transform 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+        <JellyButton
+          type="button"
+          flashColor="bg-white/20"
+          className="h-[40px] px-5 btn-send-accent flex items-center justify-center shrink-0 rounded-full"
+        >
+          <img
+            src="/send.png"
+            alt="Send"
+            className="w-[15px] h-[15px] object-contain pointer-events-none"
+          />
+        </JellyButton>
+      </div>
+    </div>
+  );
+};
