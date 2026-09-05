@@ -9,6 +9,7 @@ import { CalendarView } from '@/components/views/CalendarView';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>('chat');
+  const [calendarMode, setCalendarMode] = useState<'day' | 'week'>('day');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isInputActive, setIsInputActive] = useState(false);
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
@@ -255,6 +256,23 @@ export default function Home() {
 
   const currentTranslateX = activeTab === 'chat' ? swipeOffset : -window.innerWidth + swipeOffset;
 
+  const handleRoundButtonClick = () => {
+    if (activeTab === 'calendar') {
+      setCalendarMode((prev) => (prev === 'day' ? 'week' : 'day'));
+    }
+  };
+
+  const getRoundButtonIcon = () => {
+    if (activeTab === 'chat') {
+      return { src: '/menu.png', key: 'menu' };
+    }
+    return calendarMode === 'day'
+      ? { src: '/month.png', key: 'month' }
+      : { src: '/week.png', key: 'week' };
+  };
+
+  const currentButtonIcon = getRoundButtonIcon();
+
   return (
     <main
       onTouchStart={handlePageTouchStart}
@@ -275,23 +293,25 @@ export default function Home() {
         }`}
         style={{ top: 'calc(env(safe-area-inset-top, 44px) + 14px)' }}
       >
-        <div
-          className={`transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            activeTab === 'calendar' ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100 pointer-events-auto'
-          }`}
+        <JellyButton
+          type="button"
+          onClick={handleRoundButtonClick}
+          flashColor="bg-white/10"
+          className="w-11 h-11 rounded-full mt-glass flex items-center justify-center shadow-sm pointer-events-auto"
         >
-          <JellyButton
-            type="button"
-            flashColor="bg-white/10"
-            className="w-11 h-11 rounded-full mt-glass flex items-center justify-center shadow-sm"
-          >
-            <img
-              src="/menu.png"
-              alt="Menu"
-              className="w-5 h-5 object-contain brightness-0 invert opacity-75 pointer-events-none"
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={currentButtonIcon.key}
+              src={currentButtonIcon.src}
+              alt="Action"
+              initial={{ opacity: 0, filter: 'blur(4px)', scale: 0.8 }}
+              animate={{ opacity: 1, filter: 'blur(0px)', scale: 1 }}
+              exit={{ opacity: 0, filter: 'blur(4px)', scale: 0.8 }}
+              transition={{ duration: 0.22, ease: 'easeInOut' }}
+              className="w-5 h-5 object-contain brightness-0 invert opacity-80 pointer-events-none"
             />
-          </JellyButton>
-        </div>
+          </AnimatePresence>
+        </JellyButton>
 
         <div className="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
           <TopTabBar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -418,7 +438,12 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="w-full h-8 px-2 flex justify-center items-center cursor-grab active:cursor-grabbing select-none relative">
+                  <div
+                    onTouchStart={handleBottomTouchStart}
+                    onTouchMove={handleBottomTouchMove}
+                    onTouchEnd={handleBottomTouchEnd}
+                    className="w-full h-8 px-2 flex justify-center items-center cursor-grab active:cursor-grabbing select-none relative"
+                  >
                     <AnimatePresence mode="wait">
                       <motion.span
                         key={isScheduleOpen ? 'open-hint' : 'closed-hint'}
@@ -441,7 +466,10 @@ export default function Home() {
         </div>
 
         <div className="w-[100vw] h-full relative overflow-hidden flex-shrink-0">
-          <CalendarView />
+          <CalendarView
+            mode={calendarMode}
+            onToggleMode={() => setCalendarMode((prev) => (prev === 'day' ? 'week' : 'day'))}
+          />
         </div>
       </div>
     </main>
