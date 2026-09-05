@@ -46,17 +46,9 @@ export const TopTabBar: React.FC<TopTabBarProps> = ({ activeTab, onTabChange }) 
 
       if (s.isMoving) {
         if (dist > 15) {
-          if (sliderRef.current) {
-            sliderRef.current.style.backgroundColor = "transparent";
-            sliderRef.current.style.borderColor = "rgba(255,255,255,0.3)";
-          }
           s.tsy = 1 + 0.27 * s.intensity;
           s.tsx = 1 - 0.10 * s.intensity;
         } else if (dist <= 15 && dist > 0.5) {
-          if (sliderRef.current) {
-            sliderRef.current.style.backgroundColor = "";
-            sliderRef.current.style.borderColor = "transparent";
-          }
           s.tsy = 1 - 0.05 * s.intensity;
           s.tsx = 1 + 0.08 * s.intensity;
         } else {
@@ -64,10 +56,6 @@ export const TopTabBar: React.FC<TopTabBarProps> = ({ activeTab, onTabChange }) 
           s.tsy = 1;
           if (vel < 0.2 && Math.abs(s.vsx) < 0.2) {
             s.isMoving = false;
-            if (sliderRef.current) {
-              sliderRef.current.style.backgroundColor = "";
-              sliderRef.current.style.borderColor = "transparent";
-            }
           }
         }
       }
@@ -114,7 +102,7 @@ export const TopTabBar: React.FC<TopTabBarProps> = ({ activeTab, onTabChange }) 
     <div className="w-[200px] h-11 mt-glass rounded-full p-[4px] flex gap-[4px] shadow-sm relative select-none">
       <div
         ref={sliderRef}
-        className="absolute top-[4px] bottom-[4px] left-0 rounded-full bg-white/20 border border-white/25 z-0 pointer-events-none origin-center will-change-transform transition-colors duration-150 shadow-sm"
+        className="absolute top-[4px] bottom-[4px] left-0 rounded-full bg-white/20 z-0 pointer-events-none origin-center will-change-transform shadow-sm"
       />
 
       <button
