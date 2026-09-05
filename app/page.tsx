@@ -7,8 +7,8 @@ import { SearchInput } from '@/components/ui/SearchInput';
 
 export default function Home() {
   const [keyboardOffset, setKeyboardOffset] = useState(0);
-  const [flipAxes, setFlipAxes] = useState<('x' | 'y')[]>(['y', 'y', 'y', 'y']);
-  const [flipTrigger, setFlipTrigger] = useState(0);
+  const [isInputActive, setIsInputActive] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const handleScrollReset = () => {
@@ -18,7 +18,8 @@ export default function Home() {
     const handleViewport = () => {
       window.scrollTo(0, 0);
       if (window.visualViewport) {
-        const offset = window.innerHeight - window.visualViewport.height;
+        const vv = window.visualViewport;
+        const offset = window.innerHeight - (vv.height + vv.offsetTop);
         setKeyboardOffset(Math.max(0, offset));
       }
     };
@@ -66,15 +67,33 @@ export default function Home() {
   ];
 
   const handleRefreshIdeas = () => {
-    setFlipAxes(ideas.map(() => (Math.random() > 0.5 ? 'x' : 'y')));
-    setFlipTrigger((prev) => prev + 1);
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 240);
   };
+
+  const isKeyboardOpen = keyboardOffset > 30;
 
   return (
     <main className="fixed inset-0 w-full h-[100vh] bg-[#0a0a0a] overflow-hidden">
       
+      {isInputActive && (
+        <div
+          onClick={() => {
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur();
+            }
+          }}
+          className="fixed inset-0 z-15 bg-black/40 backdrop-blur-md transition-opacity duration-300 pointer-events-auto"
+        />
+      )}
+
       <div 
-        className="fixed left-0 right-0 px-5 z-20 flex justify-start items-center pointer-events-none"
+        className={`fixed left-0 right-0 px-5 z-20 flex justify-start items-center pointer-events-none transition-all duration-300 ${
+          isInputActive ? 'opacity-30 blur-[4px]' : 'opacity-100 blur-none'
+        }`}
         style={{ top: 'calc(env(safe-area-inset-top, 44px) + 14px)' }}
       >
         <JellyButton
@@ -91,7 +110,9 @@ export default function Home() {
       </div>
 
       <div 
-        className="fixed left-1/2 -translate-x-1/2 -translate-y-[56%] w-full max-w-[420px] px-5 z-10 pointer-events-none"
+        className={`fixed left-1/2 -translate-x-1/2 -translate-y-[56%] w-full max-w-[420px] px-5 z-10 pointer-events-none transition-all duration-300 ${
+          isInputActive ? 'opacity-30 blur-[8px]' : 'opacity-100 blur-none'
+        }`}
         style={{ top: '50%' }}
       >
         <div className="w-full flex flex-col items-start pointer-events-auto">
@@ -99,25 +120,20 @@ export default function Home() {
             Идеи, которые вдохновляют
           </h2>
 
-          <div className="w-full grid grid-cols-2 gap-2.5 [perspective:1000px]">
-            {ideas.map((item, idx) => {
-              const axis = flipAxes[idx] || 'y';
-              return (
+          <div className="w-full grid grid-cols-2 gap-2.5">
+            {ideas.map((item) => (
+              <div
+                key={item.id}
+                className="w-full h-[116px] rounded-[24px] mt-glass p-3 flex flex-col justify-between shadow-sm cursor-pointer active:scale-[0.97] transition-transform"
+              >
                 <motion.div
-                  key={item.id}
-                  animate={
-                    flipTrigger > 0
-                      ? axis === 'y'
-                        ? { rotateY: [0, 180, 360] }
-                        : { rotateX: [0, 180, 360] }
-                      : {}
-                  }
-                  transition={{
-                    duration: 0.55,
-                    ease: [0.25, 1, 0.5, 1],
-                    delay: idx * 0.05,
+                  animate={{
+                    filter: isRefreshing ? 'blur(8px)' : 'blur(0px)',
+                    opacity: isRefreshing ? 0.15 : 1,
+                    scale: isRefreshing ? 0.98 : 1,
                   }}
-                  className="w-full h-[116px] rounded-[24px] mt-glass p-3 flex flex-col justify-between shadow-sm cursor-pointer active:scale-[0.97] transition-transform"
+                  transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+                  className="w-full h-full flex flex-col justify-between"
                 >
                   <div className="w-full flex items-center gap-1.5">
                     <img
@@ -134,8 +150,8 @@ export default function Home() {
                     {item.text}
                   </p>
                 </motion.div>
-              );
-            })}
+              </div>
+            ))}
           </div>
 
           <div className="w-full flex justify-end mt-2.5 px-0.5">
@@ -159,14 +175,15 @@ export default function Home() {
       </div>
 
       <div 
-        className="fixed left-0 right-0 px-5 z-30 pointer-events-none transition-[bottom] duration-200"
+        className="fixed left-0 right-0 px-5 z-30 pointer-events-none transition-[bottom] duration-150 ease-out"
         style={{ 
-          bottom: `${keyboardOffset}px`,
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 8px)' 
+          bottom: isKeyboardOpen 
+            ? `${keyboardOffset + 8}px` 
+            : 'calc(env(safe-area-inset-bottom, 20px) + 8px)'
         }}
       >
         <div className="w-full max-w-[420px] mx-auto pointer-events-auto">
-          <SearchInput />
+          <SearchInput onFocusChange={setIsInputActive} />
         </div>
       </div>
 
