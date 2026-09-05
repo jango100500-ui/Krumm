@@ -5,7 +5,7 @@
 :root {
   --glass-blur: blur(40px) saturate(180%);
   --glass-border: 0.5px solid rgba(255, 255, 255, 0.12);
-  --glass-bg: rgba(255, 255, 255, 0.15);
+  --glass-bg: rgba(26, 26, 28, 0.8);
   --hub-bg: #0a0a0a;
 }
 
@@ -94,51 +94,4 @@ input {
 .jelly-idle {
   transform: scale(1);
   transition: transform 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes jelly-bar-tap {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.12);
-  }
-  35% {
-    transform: scale(1.025);
-    box-shadow: 0 0 24px rgba(255, 255, 255, 0.22), 0 8px 32px rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.35);
-  }
-  70% {
-    transform: scale(0.99);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.12);
-  }
-}
-
-.animate-jelly-bar {
-  animation: jelly-bar-tap 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes jelly-btn-tap {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
-  }
-  35% {
-    transform: scale(1.08);
-    box-shadow: 0 0 18px rgba(255, 255, 255, 0.45), 0 4px 12px rgba(255, 255, 255, 0.2);
-  }
-  70% {
-    transform: scale(0.96);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
-  }
-}
-
-.animate-jelly-btn {
-  animation: jelly-btn-tap 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
