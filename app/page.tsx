@@ -24,6 +24,10 @@ export default function Home() {
   const gestureLock = useRef<'horizontal' | 'vertical' | null>(null);
 
   const measureKeyboard = () => {
+    if (!isInputActive) {
+      setKeyboardHeight(0);
+      return;
+    }
     const vv = window.visualViewport;
     if (!vv) return;
     const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
@@ -49,13 +53,16 @@ export default function Home() {
 
   const handleInputBlur = () => {
     setIsInputActive(false);
-    startPolling();
+    setKeyboardHeight(0);
+    if (pollingRef.current) clearInterval(pollingRef.current);
   };
 
   const handleDismiss = () => {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
+    setIsInputActive(false);
+    setKeyboardHeight(0);
   };
 
   const handlePageTouchStart = (e: React.TouchEvent) => {
@@ -213,7 +220,9 @@ export default function Home() {
     if (!vv) return;
 
     const handleViewport = () => {
-      measureKeyboard();
+      if (isInputActive) {
+        measureKeyboard();
+      }
     };
 
     const handleScroll = () => {
@@ -240,7 +249,7 @@ export default function Home() {
       document.removeEventListener('touchstart', preventPinch);
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-  }, []);
+  }, [isInputActive]);
 
   const ideas = [
     {
@@ -265,7 +274,7 @@ export default function Home() {
     },
   ];
 
-  const isBlurred = isInputActive || keyboardHeight > 0;
+  const isBlurred = isInputActive;
   const currentPlateHeight = dragProgress * 138;
   const currentPlateBlur = (1 - dragProgress) * 3;
 
@@ -295,13 +304,6 @@ export default function Home() {
       onTouchEnd={handlePageTouchEnd}
       className="fixed inset-0 w-full h-[100dvh] bg-[#0a0a0a] overflow-hidden select-none"
     >
-      {isBlurred && (
-        <div
-          onClick={handleDismiss}
-          className="fixed inset-0 z-20 bg-black/50 transition-opacity duration-300 pointer-events-auto"
-        />
-      )}
-
       <div
         className={`fixed left-0 right-0 px-5 z-20 flex items-center pointer-events-none transition-all duration-300 ${
           isBlurred ? 'opacity-30 blur-[6px]' : 'opacity-100 blur-none'
@@ -337,10 +339,18 @@ export default function Home() {
         className="w-[200vw] h-full flex will-change-transform"
         style={{
           transform: `translateX(${currentTranslateX}px)`,
-          transition: isSwipingPage ? 'none' : 'transform 400ms cubic-bezier(0.16, 1, 0.3, 1)',
+          transition: isSwipingPage ? 'none' : 'transform 450ms cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
         <div className="w-[100vw] h-full relative overflow-hidden flex flex-col justify-between flex-shrink-0">
+          
+          {isBlurred && (
+            <div
+              onClick={handleDismiss}
+              className="absolute inset-0 z-15 bg-black/50 transition-opacity duration-300 pointer-events-auto"
+            />
+          )}
+
           <div
             className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[420px] px-5 z-10 pointer-events-none transition-all duration-300 ${
               isBlurred ? 'opacity-30 blur-[8px]' : 'opacity-100 blur-none'
@@ -380,7 +390,7 @@ export default function Home() {
           <div
             className="absolute left-0 right-0 px-5 z-30 pointer-events-none transition-[bottom] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{
-              bottom: keyboardHeight > 0 ? `${keyboardHeight + 6}px` : '8px',
+              bottom: isInputActive && keyboardHeight > 0 ? `${keyboardHeight + 6}px` : '8px',
             }}
           >
             <div
@@ -391,7 +401,7 @@ export default function Home() {
             >
               <SearchInput onFocus={handleInputFocus} onBlur={handleInputBlur} />
 
-              {keyboardHeight === 0 && (
+              {!isInputActive && (
                 <>
                   <div
                     className="w-full overflow-hidden select-none"
@@ -399,7 +409,7 @@ export default function Home() {
                       height: `${currentPlateHeight}px`,
                       opacity: dragProgress,
                       filter: `blur(${currentPlateBlur}px)`,
-                      transition: isDraggingPlate ? 'none' : 'all 380ms cubic-bezier(0.16, 1, 0.3, 1)',
+                      transition: isDraggingPlate ? 'none' : 'height 400ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms cubic-bezier(0.16, 1, 0.3, 1)',
                       marginTop: dragProgress > 0.05 ? '8px' : '0px',
                     }}
                   >
@@ -465,7 +475,7 @@ export default function Home() {
                         initial={{ opacity: 0, filter: 'blur(4px)' }}
                         animate={{ opacity: 1, filter: 'blur(0px)' }}
                         exit={{ opacity: 0, filter: 'blur(4px)' }}
-                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                         className="absolute inset-0 flex items-center justify-center text-white/35 text-[11px] font-medium text-center tracking-tight leading-tight pointer-events-none px-3"
                       >
                         {isScheduleOpen
