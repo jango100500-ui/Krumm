@@ -7,6 +7,7 @@
   --glass-border: 0.5px solid rgba(255, 255, 255, 0.12);
   --glass-bg: rgba(26, 26, 28, 0.8);
   --hub-bg: #0a0a0a;
+  --accent-red: #FF453A;
 }
 
 * {
@@ -58,16 +59,16 @@ input {
   border: var(--glass-border);
 }
 
-.btn-send-white {
-  background-color: #ffffff !important;
+.btn-send-accent {
+  background-color: var(--accent-red) !important;
   opacity: 1 !important;
   display: flex !important;
   visibility: visible !important;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 16px rgba(255, 69, 58, 0.35);
 }
 
-.btn-send-white img {
-  filter: brightness(0) !important;
+.btn-send-accent img {
+  filter: brightness(0) invert(1) !important;
   opacity: 1 !important;
 }
 
