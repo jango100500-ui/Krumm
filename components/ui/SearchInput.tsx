@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const textVariants = {
@@ -25,18 +25,36 @@ interface SearchInputProps {
 
 export const SearchInput: React.FC<SearchInputProps> = ({ onFocus, onBlur }) => {
   const [value, setValue] = useState("");
+  const [isBarAnimated, setIsBarAnimated] = useState(false);
+  const [isBtnAnimated, setIsBtnAnimated] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const placeholder = "Давайте планировать…";
 
-  useEffect(() => {
-    if (document.activeElement instanceof HTMLInputElement) {
-      document.activeElement.blur();
-    }
-  }, []);
+  const triggerBarJelly = () => {
+    setIsBarAnimated(false);
+    requestAnimationFrame(() => {
+      setIsBarAnimated(true);
+      setTimeout(() => setIsBarAnimated(false), 380);
+    });
+  };
+
+  const triggerBtnJelly = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    setIsBtnAnimated(false);
+    requestAnimationFrame(() => {
+      setIsBtnAnimated(true);
+      setTimeout(() => setIsBtnAnimated(false), 380);
+    });
+  };
 
   return (
     <div className="w-full flex items-center h-12 relative">
-      <div className="flex-1 h-full mt-glass rounded-full flex items-center justify-between pr-1 pl-5 relative z-10 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+      <div 
+        onPointerDown={triggerBarJelly}
+        className={`flex-1 h-full mt-glass rounded-full flex items-center justify-between pr-1 pl-5 relative z-10 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-transform duration-200 cursor-text ${
+          isBarAnimated ? "animate-jelly-bar" : ""
+        }`}
+      >
         <div className="relative flex-1 h-full flex items-center mr-2">
           <AnimatePresence mode="wait">
             {value === "" && (
@@ -67,7 +85,10 @@ export const SearchInput: React.FC<SearchInputProps> = ({ onFocus, onBlur }) => 
 
         <button 
           type="button"
-          className="h-[40px] px-5 btn-send-white flex items-center justify-center active:scale-90 transition-all shrink-0 rounded-full cursor-pointer"
+          onPointerDown={triggerBtnJelly}
+          className={`h-[40px] px-5 btn-send-white flex items-center justify-center shrink-0 rounded-full cursor-pointer ${
+            isBtnAnimated ? "animate-jelly-btn" : "active:scale-95"
+          }`}
         >
           <img 
             src="/send.png" 
