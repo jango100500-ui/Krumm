@@ -178,7 +178,7 @@ export default function Home() {
   ];
 
   const isBlurred = isInputActive || keyboardHeight > 0;
-  const currentHeight = dragProgress * 152;
+  const currentHeight = dragProgress * 138;
   const plateBlur = (1 - dragProgress) * 4;
 
   return (
@@ -281,7 +281,7 @@ export default function Home() {
                       marginTop: dragProgress > 0.05 ? '8px' : '0px',
                     }}
                   >
-                    <div className="w-full h-[152px] mt-glass rounded-[28px] p-4 flex flex-col justify-between shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+                    <div className="w-full h-[138px] mt-glass rounded-[28px] p-4 flex flex-col justify-between shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
                       <div className="flex items-center justify-between">
                         <span className="text-white text-[15px] font-bold tracking-tight">
                           Ближайшее
@@ -307,9 +307,9 @@ export default function Home() {
                           Сегодня, 8 Сентября
                         </span>
 
-                        <div className="flex flex-col">
+                        <div className="flex flex-col gap-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-white text-[13px] font-semibold tracking-tight w-[100px]">
+                            <span className="text-white text-[13px] font-semibold tracking-tight">
                               09:00-15:00
                             </span>
                             <span className="text-white/90 text-[13px] font-medium tracking-tight">
@@ -317,12 +317,8 @@ export default function Home() {
                             </span>
                           </div>
 
-                          <div className="w-[100px] flex justify-center py-0.5">
-                            <div className="w-[1.5px] h-3 bg-white/20 rounded-full" />
-                          </div>
-
                           <div className="flex items-center justify-between">
-                            <span className="text-white/75 text-[13px] font-semibold tracking-tight w-[100px]">
+                            <span className="text-white/75 text-[13px] font-semibold tracking-tight">
                               16:00-17:30
                             </span>
                             <span className="text-white/75 text-[13px] font-medium tracking-tight">
@@ -341,7 +337,7 @@ export default function Home() {
                     onMouseDown={handleTouchStart}
                     onMouseMove={handleTouchMove}
                     onMouseUp={handleTouchEnd}
-                    className="w-full pt-1.5 pb-0.5 px-2 flex justify-center items-center cursor-grab active:cursor-grabbing select-none"
+                    className="w-full h-8 px-2 flex justify-center items-center cursor-grab active:cursor-grabbing select-none relative"
                   >
                     <AnimatePresence mode="wait">
                       <motion.span
@@ -349,8 +345,8 @@ export default function Home() {
                         initial={{ opacity: 0, filter: "blur(4px)" }}
                         animate={{ opacity: 1, filter: "blur(0px)" }}
                         exit={{ opacity: 0, filter: "blur(4px)" }}
-                        transition={{ duration: 0.22, ease: "easeOut" }}
-                        className="text-white/35 text-[11px] font-medium text-center tracking-tight leading-tight pointer-events-none"
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="absolute inset-0 flex items-center justify-center text-white/35 text-[11px] font-medium text-center tracking-tight leading-tight pointer-events-none px-3"
                       >
                         {isScheduleOpen
                           ? "Теперь потяните сверху вниз, чтобы вернуть чат в привычный вид"
