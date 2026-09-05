@@ -7,7 +7,7 @@
   --glass-border: 0.5px solid rgba(255, 255, 255, 0.12);
   --glass-bg: rgba(26, 26, 28, 0.8);
   --hub-bg: #0a0a0a;
-  --accent-red: #FF453A;
+  --accent-red: #E33125;
 }
 
 * {
@@ -64,7 +64,7 @@ input {
   opacity: 1 !important;
   display: flex !important;
   visibility: visible !important;
-  box-shadow: 0 4px 16px rgba(255, 69, 58, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .btn-send-accent img {
