@@ -1,19 +1,46 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { JellyButton } from '@/components/ui/JellyButton';
 import { SearchInput } from '@/components/ui/SearchInput';
 
 export default function Home() {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const measureKeyboard = () => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    setKeyboardHeight(offset > 60 ? offset : 0);
+  };
+
+  const startPolling = () => {
+    if (pollingRef.current) clearInterval(pollingRef.current);
+    let count = 0;
+    pollingRef.current = setInterval(() => {
+      measureKeyboard();
+      count++;
+      if (count > 25) {
+        if (pollingRef.current) clearInterval(pollingRef.current);
+      }
+    }, 20);
+  };
+
+  const handleInputFocus = () => {
+    startPolling();
+  };
+
+  const handleInputBlur = () => {
+    startPolling();
+  };
 
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
 
     const handleViewport = () => {
-      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      setKeyboardHeight(offset > 60 ? offset : 0);
+      measureKeyboard();
     };
 
     const handleScroll = () => {
@@ -36,6 +63,7 @@ export default function Home() {
       vv.removeEventListener('scroll', handleViewport);
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('touchstart', preventPinch);
+      if (pollingRef.current) clearInterval(pollingRef.current);
     };
   }, []);
 
@@ -82,10 +110,7 @@ export default function Home() {
         </JellyButton>
       </div>
 
-      <div 
-        className="fixed left-1/2 -translate-x-1/2 -translate-y-[56%] w-full max-w-[420px] px-5 z-10 pointer-events-none"
-        style={{ top: '50%' }}
-      >
+      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[420px] px-5 z-10 pointer-events-none">
         <div className="w-full flex flex-col items-start pointer-events-auto">
           <h2 className="text-white text-[19px] font-bold tracking-tight mb-3 px-1 text-left">
             Идеи, которые вдохновляют
@@ -120,15 +145,15 @@ export default function Home() {
       </div>
 
       <div 
-        className="fixed left-0 right-0 px-5 z-30 pointer-events-none transition-[bottom] duration-200 ease-out"
+        className="fixed left-0 right-0 px-5 z-30 pointer-events-none transition-[bottom] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{ 
           bottom: keyboardHeight > 0 
-            ? `${keyboardHeight + 8}px` 
-            : 'calc(env(safe-area-inset-bottom, 20px) + 8px)'
+            ? `${keyboardHeight + 6}px` 
+            : 'calc(env(safe-area-inset-bottom, 0px) + 2px)'
         }}
       >
         <div className="w-full max-w-[420px] mx-auto pointer-events-auto">
-          <SearchInput />
+          <SearchInput onFocus={handleInputFocus} onBlur={handleInputBlur} />
         </div>
       </div>
 
