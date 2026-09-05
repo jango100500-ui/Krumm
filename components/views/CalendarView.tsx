@@ -29,6 +29,13 @@ const WEEK_DAYS = [
   { name: "вс", day: 14 },
 ];
 
+const truncateTitle = (title: string, maxLen = 7) => {
+  if (title.length > maxLen) {
+    return title.slice(0, maxLen) + "…";
+  }
+  return title;
+};
+
 export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
   const [selectedDay, setSelectedDay] = useState<number>(8);
   const [isSubtasksOpen, setIsSubtasksOpen] = useState<boolean>(true);
@@ -64,7 +71,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
 
   return (
     <div className="w-full h-full flex flex-col pt-[calc(env(safe-area-inset-top,44px)+66px)] select-none overflow-hidden">
-      
       <div className="w-full max-w-[420px] mx-auto px-5 flex-shrink-0 z-10 pb-2">
         {mode === "day" ? (
           <>
@@ -391,11 +397,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
 
                     <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.09] border border-white/10 backdrop-blur-[40px] p-2.5 flex flex-col justify-start shadow-sm"
+                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.09] border border-white/10 backdrop-blur-[40px] p-2.5 flex flex-col justify-start shadow-sm overflow-hidden"
                         style={{ top: "468px", height: "312px" }}
                       >
                         <span className="text-[12px] font-bold text-white tracking-tight leading-tight">
-                          Пары
+                          {truncateTitle("Пары")}
                         </span>
                         <span className="text-[10px] font-medium text-white/60 mt-1 tracking-tight">
                           09:00–15:00
@@ -405,11 +411,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
 
                     <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.06] border border-white/10 p-2 flex flex-col justify-center shadow-sm"
+                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.06] border border-white/10 p-2 flex flex-col justify-center shadow-sm overflow-hidden"
                         style={{ top: "988px", height: "52px" }}
                       >
                         <span className="text-[11px] font-semibold text-white tracking-tight leading-tight">
-                          Немецкий
+                          {truncateTitle("Немецкий")}
                         </span>
                         <span className="text-[9px] text-white/50 mt-0.5">19:00</span>
                       </div>
@@ -417,11 +423,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
 
                     <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-1 right-1 rounded-[18px] mt-glass p-2.5 flex flex-col justify-start border border-white/10 shadow-sm"
+                        className="absolute left-1 right-1 rounded-[18px] mt-glass p-2.5 flex flex-col justify-start border border-white/10 shadow-sm overflow-hidden"
                         style={{ top: "468px", height: "312px" }}
                       >
                         <span className="text-[12px] font-bold text-white tracking-tight leading-tight">
-                          Пары
+                          {truncateTitle("Пары")}
                         </span>
                         <span className="text-[10px] font-medium text-white/60 mt-1 tracking-tight">
                           09:00–15:00
@@ -431,11 +437,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
 
                     <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-1 right-1 rounded-[18px] mt-glass p-2.5 flex flex-col justify-start border border-white/10 shadow-sm"
+                        className="absolute left-1 right-1 rounded-[18px] mt-glass p-2.5 flex flex-col justify-start border border-white/10 shadow-sm overflow-hidden"
                         style={{ top: "468px", height: "312px" }}
                       >
                         <span className="text-[12px] font-bold text-white tracking-tight leading-tight">
-                          Пары
+                          {truncateTitle("Пары")}
                         </span>
                         <span className="text-[10px] font-medium text-white/60 mt-1 tracking-tight">
                           09:00–15:00
@@ -443,21 +449,21 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                       </div>
 
                       <div
-                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.06] border border-white/10 p-2 flex flex-col justify-center shadow-sm"
+                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.06] border border-white/10 p-2 flex flex-col justify-center shadow-sm overflow-hidden"
                         style={{ top: "936px", height: "52px" }}
                       >
-                        <span className="text-[11px] font-semibold text-white tracking-tight leading-tight truncate">
-                          Тренировка
+                        <span className="text-[11px] font-semibold text-white tracking-tight leading-tight">
+                          {truncateTitle("Тренировка")}
                         </span>
                         <span className="text-[9px] text-white/50 mt-0.5">18:00</span>
                       </div>
 
                       <div
-                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.06] border border-white/10 p-2 flex flex-col justify-center shadow-sm"
+                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.06] border border-white/10 p-2 flex flex-col justify-center shadow-sm overflow-hidden"
                         style={{ top: "988px", height: "52px" }}
                       >
                         <span className="text-[11px] font-semibold text-white tracking-tight leading-tight">
-                          Немецкий
+                          {truncateTitle("Немецкий")}
                         </span>
                         <span className="text-[9px] text-white/50 mt-0.5">19:00</span>
                       </div>
@@ -465,11 +471,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
 
                     <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-1 right-1 rounded-[18px] mt-glass p-2.5 flex flex-col justify-start border border-white/10 shadow-sm"
+                        className="absolute left-1 right-1 rounded-[18px] mt-glass p-2.5 flex flex-col justify-start border border-white/10 shadow-sm overflow-hidden"
                         style={{ top: "468px", height: "312px" }}
                       >
                         <span className="text-[12px] font-bold text-white tracking-tight leading-tight">
-                          Пары
+                          {truncateTitle("Пары")}
                         </span>
                         <span className="text-[10px] font-medium text-white/60 mt-1 tracking-tight">
                           09:00–15:00
@@ -479,11 +485,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
 
                     <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.08] border border-white/10 p-2.5 flex flex-col justify-start shadow-sm"
+                        className="absolute left-1 right-1 rounded-[18px] bg-white/[0.08] border border-white/15 p-2.5 flex flex-col justify-start shadow-sm overflow-hidden"
                         style={{ top: "728px", height: "104px" }}
                       >
                         <span className="text-[11px] font-semibold text-white tracking-tight leading-tight">
-                          Встреча с Машей
+                          {truncateTitle("Встреча с Машей")}
                         </span>
                         <span className="text-[9px] text-white/50 mt-1">14:00</span>
                       </div>
