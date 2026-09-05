@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: "#0a0a0a",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -11,9 +11,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Krumm",
+  title: "Krummbul",
   description: "AI Planner",
-  applicationName: "Krumm",
+  applicationName: "Krummbul",
   appleWebApp: {
     capable: true,
     title: "Krummbul",
