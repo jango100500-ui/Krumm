@@ -90,7 +90,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                     <div
                       className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
                         isSelected
-                          ? "bg-[#FF453A] text-white font-bold shadow-[0_2px_12px_rgba(255,69,58,0.4)] scale-105"
+                          ? "bg-[#E33125] text-white font-bold shadow-sm scale-105"
                           : "text-white font-medium hover:bg-white/10"
                       }`}
                     >
@@ -149,7 +149,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
               className="w-full h-full overflow-y-auto scroll-y-touch px-5 pb-[calc(env(safe-area-inset-bottom,20px)+40px)]"
             >
               <div className="w-full max-w-[420px] mx-auto flex flex-col gap-4 relative pt-1">
-                
                 <div className="w-full flex items-stretch gap-3">
                   <div className="w-11 flex flex-col justify-between items-end flex-shrink-0 py-1 select-none">
                     <span className="text-[12px] font-semibold text-white/70 tracking-tight leading-none">
@@ -161,7 +160,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                     </span>
                   </div>
 
-                  <div className="flex-1 rounded-[26px] bg-[rgba(255,69,58,0.07)] border border-[rgba(255,69,58,0.18)] backdrop-blur-[40px] p-4 flex flex-col gap-3 shadow-[0_8px_32px_rgba(255,69,58,0.12)]">
+                  <motion.div
+                    layout
+                    transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                    className="flex-1 rounded-[26px] bg-[rgba(227,49,37,0.08)] border border-[rgba(227,49,37,0.18)] backdrop-blur-[40px] p-4 flex flex-col gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.25)] overflow-hidden"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex flex-col">
                         <span className="text-white text-[16px] font-bold tracking-tight leading-tight">
@@ -189,7 +192,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                           <span className="text-white text-[13px] font-semibold tracking-tight">
                             Есть дополнительные задачи
                           </span>
-                          <div className="w-5 h-5 rounded-full bg-[#FF453A] text-white font-bold text-[11px] flex items-center justify-center shadow-sm">
+                          <div className="w-5 h-5 rounded-full bg-[#E33125] text-white font-bold text-[11px] flex items-center justify-center shadow-sm">
                             {subtasks.length}
                           </div>
                         </div>
@@ -211,60 +214,63 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                         </motion.svg>
                       </button>
 
-                      <AnimatePresence>
+                      <AnimatePresence initial={false}>
                         {isSubtasksOpen && (
                           <motion.div
+                            key="subtasks-container"
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                            className="overflow-hidden flex flex-col gap-2 pt-3"
+                            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden"
                           >
-                            {subtasks.map((st) => (
-                              <div
-                                key={st.id}
-                                onClick={() => toggleSubtask(st.id)}
-                                className="flex items-center gap-2.5 cursor-pointer py-0.5"
-                              >
+                            <div className="pt-3 flex flex-col gap-2">
+                              {subtasks.map((st) => (
                                 <div
-                                  className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors duration-200 flex-shrink-0 ${
-                                    st.completed
-                                      ? "bg-[#FF453A] border-[#FF453A] text-white"
-                                      : "border-white/30 bg-white/5"
-                                  }`}
+                                  key={st.id}
+                                  onClick={() => toggleSubtask(st.id)}
+                                  className="flex items-center gap-2.5 cursor-pointer py-0.5"
                                 >
-                                  {st.completed && (
-                                    <svg
-                                      className="w-3 h-3 text-white stroke-[3]"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      stroke="currentColor"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M5 13l4 4L19 7"
-                                      />
-                                    </svg>
-                                  )}
-                                </div>
+                                  <div
+                                    className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors duration-200 flex-shrink-0 ${
+                                      st.completed
+                                        ? "bg-[#E33125] border-[#E33125] text-white"
+                                        : "border-white/30 bg-white/5"
+                                    }`}
+                                  >
+                                    {st.completed && (
+                                      <svg
+                                        className="w-3 h-3 text-white stroke-[3]"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M5 13l4 4L19 7"
+                                        />
+                                      </svg>
+                                    )}
+                                  </div>
 
-                                <span
-                                  className={`text-[13px] font-medium tracking-tight transition-all duration-200 ${
-                                    st.completed
-                                      ? "text-white/40 line-through"
-                                      : "text-white/85"
-                                  }`}
-                                >
-                                  {st.title}
-                                </span>
-                              </div>
-                            ))}
+                                  <span
+                                    className={`text-[13px] font-medium tracking-tight transition-all duration-200 ${
+                                      st.completed
+                                        ? "text-white/40 line-through"
+                                        : "text-white/85"
+                                    }`}
+                                  >
+                                    {st.title}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
 
                 <div className="w-full flex items-stretch gap-3">
@@ -293,7 +299,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
                       onClick={() => setIsStandaloneTaskDone(!isStandaloneTaskDone)}
                       className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors duration-200 cursor-pointer ${
                         isStandaloneTaskDone
-                          ? "bg-[#FF453A] border-[#FF453A] text-white"
+                          ? "bg-[#E33125] border-[#E33125] text-white"
                           : "border-white/30 bg-white/5"
                       }`}
                     >
@@ -422,7 +428,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ mode }) => {
 
                     <div className="w-[72px] relative h-full flex-shrink-0">
                       <div
-                        className="absolute left-1 right-1 rounded-[18px] bg-[rgba(255,69,58,0.07)] border border-[rgba(255,69,58,0.18)] backdrop-blur-[40px] p-2.5 flex flex-col justify-start shadow-sm overflow-hidden"
+                        className="absolute left-1 right-1 rounded-[18px] bg-[rgba(227,49,37,0.08)] border border-[rgba(227,49,37,0.18)] backdrop-blur-[40px] p-2.5 flex flex-col justify-start shadow-sm overflow-hidden"
                         style={{ top: "468px", height: "312px" }}
                       >
                         <span className="text-[12px] font-bold text-white tracking-tight leading-tight">
