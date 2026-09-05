@@ -11,12 +11,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Krummbul",
+  title: "Krumm",
   description: "AI Planner",
-  applicationName: "Krummbul",
+  applicationName: "Krumm",
   appleWebApp: {
     capable: true,
-    title: "Krummbul",
+    title: "Krumm",
     statusBarStyle: "black-translucent",
   },
   icons: {
