@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { JellyButton } from "@/components/ui/JellyButton";
 
@@ -26,29 +26,8 @@ interface SearchInputProps {
 
 export const SearchInput: React.FC<SearchInputProps> = ({ onFocus, onBlur }) => {
   const [value, setValue] = useState("");
-  const [isEditable, setIsEditable] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const placeholder = "Давайте планировать…";
-
-  useEffect(() => {
-    if (document.activeElement instanceof HTMLInputElement) {
-      document.activeElement.blur();
-    }
-  }, []);
-
-  const handlePointerDown = () => {
-    setIsEditable(true);
-  };
-
-  const handleFocus = () => {
-    setIsEditable(true);
-    onFocus?.();
-  };
-
-  const handleBlur = () => {
-    setIsEditable(false);
-    onBlur?.();
-  };
 
   return (
     <div className="w-full flex items-center h-12 relative">
@@ -73,16 +52,10 @@ export const SearchInput: React.FC<SearchInputProps> = ({ onFocus, onBlur }) => 
           <input
             ref={inputRef}
             type="text"
-            readOnly={!isEditable}
-            autoFocus={false}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            onPointerDown={handlePointerDown}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
+            onFocus={onFocus}
+            onBlur={onBlur}
             className="bg-transparent border-none outline-none text-white text-[16px] w-full font-medium relative z-10 tracking-tight"
           />
         </div>
