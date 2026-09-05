@@ -60,15 +60,22 @@ export default function Home() {
 
   const handlePageTouchStart = (e: React.TouchEvent) => {
     if (keyboardHeight > 0 || isInputActive) return;
-    touchStartPos.current = {
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY,
-    };
+
+    const startX = e.touches[0].clientX;
+    const startY = e.touches[0].clientY;
+
+    if (activeTab === 'calendar' && startX > 32) {
+      return;
+    }
+
+    touchStartPos.current = { x: startX, y: startY };
     gestureLock.current = null;
   };
 
   const handlePageTouchMove = (e: React.TouchEvent) => {
+    if (keyboardHeight > 0 || isInputActive) return;
     if (!touchStartPos.current) return;
+
     const currentX = e.touches[0].clientX;
     const currentY = e.touches[0].clientY;
     const deltaX = currentX - touchStartPos.current.x;
@@ -97,6 +104,14 @@ export default function Home() {
   };
 
   const handlePageTouchEnd = () => {
+    if (keyboardHeight > 0 || isInputActive) {
+      setSwipeOffset(0);
+      setIsSwipingPage(false);
+      touchStartPos.current = null;
+      gestureLock.current = null;
+      return;
+    }
+
     if (gestureLock.current === 'horizontal') {
       setIsSwipingPage(false);
       const threshold = window.innerWidth * 0.25;
@@ -283,7 +298,7 @@ export default function Home() {
       {isBlurred && (
         <div
           onClick={handleDismiss}
-          className="fixed inset-0 z-20 bg-black/25 backdrop-blur-md transition-opacity duration-300 pointer-events-auto"
+          className="fixed inset-0 z-20 bg-black/50 transition-opacity duration-300 pointer-events-auto"
         />
       )}
 
