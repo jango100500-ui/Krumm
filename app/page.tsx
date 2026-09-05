@@ -7,7 +7,10 @@ import { SearchInput } from '@/components/ui/SearchInput';
 export default function Home() {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isInputActive, setIsInputActive] = useState(false);
+  const [plateTop, setPlateTop] = useState<number | null>(null);
+
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const ideasRef = useRef<HTMLDivElement>(null);
 
   const measureKeyboard = () => {
     const vv = window.visualViewport;
@@ -45,6 +48,16 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const updatePlatePosition = () => {
+      if (ideasRef.current) {
+        const rect = ideasRef.current.getBoundingClientRect();
+        setPlateTop(rect.top - 20);
+      }
+    };
+
+    updatePlatePosition();
+    window.addEventListener('resize', updatePlatePosition);
+
     const resetFocusState = () => {
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
@@ -87,6 +100,7 @@ export default function Home() {
     document.addEventListener('touchstart', preventPinch, { passive: false });
 
     return () => {
+      window.removeEventListener('resize', updatePlatePosition);
       window.removeEventListener('pageshow', resetFocusState);
       document.removeEventListener('visibilitychange', handleVisibility);
       vv.removeEventListener('resize', handleViewport);
@@ -102,25 +116,21 @@ export default function Home() {
       id: 1,
       title: 'Случайная идея',
       text: 'Это текст идеи, в будущем разраб обязательно нас добавит',
-      tilt: 'rotate-[1.5deg]',
     },
     {
       id: 2,
       title: 'Случайная идея',
       text: 'Это текст идеи, в будущем разраб обязательно нас добавит',
-      tilt: '-rotate-[1.8deg]',
     },
     {
       id: 3,
       title: 'Случайная идея',
       text: 'Это текст идеи, в будущем разраб обязательно нас добавит',
-      tilt: '-rotate-[1.2deg]',
     },
     {
       id: 4,
       title: 'Случайная идея',
       text: 'Это текст идеи, в будущем разраб обязательно нас добавит',
-      tilt: 'rotate-[1.6deg]',
     },
   ];
 
@@ -129,6 +139,17 @@ export default function Home() {
   return (
     <main className="fixed inset-0 w-full h-[100dvh] bg-[#0a0a0a] overflow-hidden">
       
+      <div 
+        className="fixed left-0 right-0 bottom-0 bg-[var(--plate-bg)] z-0 pointer-events-none"
+        style={{ top: plateTop !== null ? `${plateTop}px` : 'calc(50vh - 160px)' }}
+      >
+        <img
+          src="/clouds.png"
+          alt="Clouds"
+          className="absolute bottom-full left-0 w-full h-auto pointer-events-none select-none block"
+        />
+      </div>
+
       {isBlurred && (
         <div
           onClick={handleDismiss}
@@ -160,7 +181,10 @@ export default function Home() {
           isBlurred ? 'opacity-30 blur-[8px]' : 'opacity-100 blur-none'
         }`}
       >
-        <div className="w-full flex flex-col items-start pointer-events-auto">
+        <div 
+          ref={ideasRef}
+          className="w-full flex flex-col items-start pointer-events-auto"
+        >
           <h2 className="text-white text-[19px] font-bold tracking-tight mb-3 px-1 text-left">
             Идеи, которые вдохновляют
           </h2>
@@ -169,7 +193,7 @@ export default function Home() {
             {ideas.map((item) => (
               <div
                 key={item.id}
-                className={`w-full h-[116px] rounded-[24px] mt-glass p-3 flex flex-col justify-start gap-1.5 shadow-sm cursor-pointer active:scale-[0.97] transition-transform ${item.tilt}`}
+                className="w-full h-[116px] rounded-[24px] mt-glass p-3 flex flex-col justify-start gap-1.5 shadow-sm cursor-pointer active:scale-[0.97] transition-transform"
               >
                 <div className="w-full flex items-center gap-1.5">
                   <img
