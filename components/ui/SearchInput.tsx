@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const textVariants = {
@@ -25,7 +25,14 @@ interface SearchInputProps {
 
 export const SearchInput: React.FC<SearchInputProps> = ({ onFocus, onBlur }) => {
   const [value, setValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
   const placeholder = "Давайте планировать…";
+
+  useEffect(() => {
+    if (document.activeElement instanceof HTMLInputElement) {
+      document.activeElement.blur();
+    }
+  }, []);
 
   return (
     <div className="w-full flex items-center h-12 relative">
@@ -48,6 +55,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({ onFocus, onBlur }) => 
           </AnimatePresence>
 
           <input
+            ref={inputRef}
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
