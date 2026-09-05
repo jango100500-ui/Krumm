@@ -45,6 +45,25 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const resetFocusState = () => {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      setIsInputActive(false);
+      setKeyboardHeight(0);
+    };
+
+    resetFocusState();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        resetFocusState();
+      }
+    };
+
+    window.addEventListener('pageshow', resetFocusState);
+    document.addEventListener('visibilitychange', handleVisibility);
+
     const vv = window.visualViewport;
     if (!vv) return;
 
@@ -68,6 +87,8 @@ export default function Home() {
     document.addEventListener('touchstart', preventPinch, { passive: false });
 
     return () => {
+      window.removeEventListener('pageshow', resetFocusState);
+      document.removeEventListener('visibilitychange', handleVisibility);
       vv.removeEventListener('resize', handleViewport);
       vv.removeEventListener('scroll', handleViewport);
       window.removeEventListener('scroll', handleScroll);
@@ -81,25 +102,25 @@ export default function Home() {
       id: 1,
       title: 'Случайная идея',
       text: 'Это текст идеи, в будущем разраб обязательно нас добавит',
-      tilt: '-rotate-[1.5deg]',
+      tilt: 'rotate-[1.5deg]',
     },
     {
       id: 2,
       title: 'Случайная идея',
       text: 'Это текст идеи, в будущем разраб обязательно нас добавит',
-      tilt: 'rotate-[1.8deg]',
+      tilt: '-rotate-[1.8deg]',
     },
     {
       id: 3,
       title: 'Случайная идея',
       text: 'Это текст идеи, в будущем разраб обязательно нас добавит',
-      tilt: 'rotate-[1.2deg]',
+      tilt: '-rotate-[1.2deg]',
     },
     {
       id: 4,
       title: 'Случайная идея',
       text: 'Это текст идеи, в будущем разраб обязательно нас добавит',
-      tilt: '-rotate-[1.6deg]',
+      tilt: 'rotate-[1.6deg]',
     },
   ];
 
@@ -148,7 +169,7 @@ export default function Home() {
             {ideas.map((item) => (
               <div
                 key={item.id}
-                className={`w-full h-[116px] rounded-[24px] mt-glass p-3 flex flex-col justify-between shadow-sm cursor-pointer active:scale-[0.97] transition-transform ${item.tilt}`}
+                className={`w-full h-[116px] rounded-[24px] mt-glass p-3 flex flex-col justify-start gap-1.5 shadow-sm cursor-pointer active:scale-[0.97] transition-transform ${item.tilt}`}
               >
                 <div className="w-full flex items-center gap-1.5">
                   <img
@@ -161,28 +182,4 @@ export default function Home() {
                   </span>
                 </div>
 
-                <p className="text-white/50 text-[11px] font-normal leading-snug tracking-tight text-left">
-                  {item.text}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div 
-        className="fixed left-0 right-0 px-5 z-30 pointer-events-none transition-[bottom] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        style={{ 
-          bottom: keyboardHeight > 0 
-            ? `${keyboardHeight + 6}px` 
-            : '10px'
-        }}
-      >
-        <div className="w-full max-w-[420px] mx-auto pointer-events-auto">
-          <SearchInput onFocus={handleInputFocus} onBlur={handleInputBlur} />
-        </div>
-      </div>
-
-    </main>
-  );
-}
+                <p className="
