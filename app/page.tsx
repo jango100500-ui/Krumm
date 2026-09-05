@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { JellyButton } from '@/components/ui/JellyButton';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { TopTabBar, TabType } from '@/components/ui/TopTabBar';
@@ -10,7 +11,12 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>('chat');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isInputActive, setIsInputActive] = useState(false);
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+  const [dragProgress, setDragProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   const measureKeyboard = () => {
     const vv = window.visualViewport;
@@ -46,6 +52,54 @@ export default function Home() {
       document.activeElement.blur();
     }
   };
+
+  const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    touchStartY.current = clientY;
+    setIsDragging(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if (touchStartY.current === null) return;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const deltaY = touchStartY.current - clientY;
+
+    if (!isScheduleOpen) {
+      const progress = Math.max(0, Math.min(1, deltaY / 130));
+      setDragProgress(progress);
+    } else {
+      const progress = Math.max(0, Math.min(1, 1 - (-deltaY) / 130));
+      setDragProgress(progress);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartY.current === null) return;
+    setIsDragging(false);
+    touchStartY.current = null;
+
+    if (!isScheduleOpen) {
+      if (dragProgress > 0.32) {
+        setIsScheduleOpen(true);
+        setDragProgress(1);
+      } else {
+        setDragProgress(0);
+      }
+    } else {
+      if (dragProgress < 0.68) {
+        setIsScheduleOpen(false);
+        setDragProgress(0);
+      } else {
+        setDragProgress(1);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!isDragging) {
+      setDragProgress(isScheduleOpen ? 1 : 0);
+    }
+  }, [isScheduleOpen, isDragging]);
 
   useEffect(() => {
     const resetFocusState = () => {
@@ -124,6 +178,8 @@ export default function Home() {
   ];
 
   const isBlurred = isInputActive || keyboardHeight > 0;
+  const currentHeight = dragProgress * 152;
+  const plateBlur = (1 - dragProgress) * 4;
 
   return (
     <main className="fixed inset-0 w-full h-[100dvh] bg-[#0a0a0a] overflow-hidden">
@@ -201,64 +257,108 @@ export default function Home() {
             style={{ 
               bottom: keyboardHeight > 0 
                 ? `${keyboardHeight + 6}px` 
-                : '10px'
+                : '8px'
             }}
           >
-            <div className="w-full max-w-[420px] mx-auto flex flex-col gap-2.5 pointer-events-auto">
+            <div className="w-full max-w-[420px] mx-auto flex flex-col pointer-events-auto">
               <SearchInput onFocus={handleInputFocus} onBlur={handleInputBlur} />
 
               {keyboardHeight === 0 && (
-                <div className="w-full mt-glass rounded-[28px] p-4 flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.3)] select-none">
-                  <div className="flex items-center justify-between mb-2.5">
-                    <div className="px-3 py-1 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-                      <span className="text-white text-[12px] font-semibold tracking-tight">
-                        Ближайшее
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="flex items-center gap-1 text-white/45 hover:text-white/75 transition-colors cursor-pointer"
-                    >
-                      <span className="text-[13px] font-medium tracking-tight">
-                        Смотреть все
-                      </span>
-                      <img
-                        src="/right.png"
-                        alt="All"
-                        className="w-3.5 h-3.5 object-contain brightness-0 invert opacity-45 pointer-events-none"
-                      />
-                    </button>
-                  </div>
-
-                  <div className="flex flex-col">
-                    <span className="text-white/60 text-[12px] font-medium tracking-tight mb-2">
-                      Сегодня, 8 Сентября
-                    </span>
-
-                    <div className="flex flex-col relative">
+                <>
+                  <div
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onMouseDown={handleTouchStart}
+                    onMouseMove={handleTouchMove}
+                    onMouseUp={handleTouchEnd}
+                    className="w-full overflow-hidden select-none"
+                    style={{
+                      height: `${currentHeight}px`,
+                      opacity: dragProgress,
+                      filter: `blur(${plateBlur}px)`,
+                      transition: isDragging ? 'none' : 'all 350ms cubic-bezier(0.16, 1, 0.3, 1)',
+                      marginTop: dragProgress > 0.05 ? '8px' : '0px',
+                    }}
+                  >
+                    <div className="w-full h-[152px] mt-glass rounded-[28px] p-4 flex flex-col justify-between shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
                       <div className="flex items-center justify-between">
-                        <span className="text-white text-[13px] font-semibold tracking-tight">
-                          09:00-15:00
+                        <span className="text-white text-[15px] font-bold tracking-tight">
+                          Ближайшее
                         </span>
-                        <span className="text-white/90 text-[13px] font-medium tracking-tight">
-                          Пары
-                        </span>
+
+                        <button
+                          type="button"
+                          className="flex items-center gap-1.5 text-white/45 hover:text-white/75 transition-colors cursor-pointer"
+                        >
+                          <span className="text-[13px] font-medium tracking-tight">
+                            Смотреть все
+                          </span>
+                          <img
+                            src="/calendar.png"
+                            alt="Calendar"
+                            className="w-3.5 h-3.5 object-contain brightness-0 invert opacity-45 pointer-events-none"
+                          />
+                        </button>
                       </div>
 
-                      <div className="w-[1.5px] h-3.5 bg-white/20 ml-2 my-0.5" />
+                      <div className="flex flex-col">
+                        <span className="text-white/60 text-[12px] font-medium tracking-tight mb-2">
+                          Сегодня, 8 Сентября
+                        </span>
 
-                      <div className="flex items-center justify-between">
-                        <span className="text-white/75 text-[13px] font-semibold tracking-tight">
-                          16:00-17:30
-                        </span>
-                        <span className="text-white/75 text-[13px] font-medium tracking-tight">
-                          Немецкий
-                        </span>
+                        <div className="flex flex-col">
+                          <div className="flex items-center justify-between">
+                            <span className="text-white text-[13px] font-semibold tracking-tight w-[100px]">
+                              09:00-15:00
+                            </span>
+                            <span className="text-white/90 text-[13px] font-medium tracking-tight">
+                              Пары
+                            </span>
+                          </div>
+
+                          <div className="w-[100px] flex justify-center py-0.5">
+                            <div className="w-[1.5px] h-3 bg-white/20 rounded-full" />
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-white/75 text-[13px] font-semibold tracking-tight w-[100px]">
+                              16:00-17:30
+                            </span>
+                            <span className="text-white/75 text-[13px] font-medium tracking-tight">
+                              Немецкий
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+
+                  <div
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onMouseDown={handleTouchStart}
+                    onMouseMove={handleTouchMove}
+                    onMouseUp={handleTouchEnd}
+                    className="w-full pt-1.5 pb-0.5 px-2 flex justify-center items-center cursor-grab active:cursor-grabbing select-none"
+                  >
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={isScheduleOpen ? "open-hint" : "closed-hint"}
+                        initial={{ opacity: 0, filter: "blur(4px)" }}
+                        animate={{ opacity: 1, filter: "blur(0px)" }}
+                        exit={{ opacity: 0, filter: "blur(4px)" }}
+                        transition={{ duration: 0.22, ease: "easeOut" }}
+                        className="text-white/35 text-[11px] font-medium text-center tracking-tight leading-tight pointer-events-none"
+                      >
+                        {isScheduleOpen
+                          ? "Теперь потяните сверху вниз, чтобы вернуть чат в привычный вид"
+                          : "Потяните снизу вверх чтобы быстро посмотреть свои ближайшие планы"}
+                      </motion.span>
+                    </AnimatePresence>
+                  </div>
+                </>
               )}
             </div>
           </div>
