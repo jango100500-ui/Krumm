@@ -4,9 +4,9 @@
 
 :root {
   --glass-blur: blur(40px) saturate(180%);
-  --glass-border: 0.85px solid rgba(255, 255, 255, 0.22);
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --hub-bg: #0a0a0a;
+  --glass-border: 0.5px solid rgba(255, 255, 255, 0.06);
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --hub-bg: #141416;
 }
 
 * {
@@ -71,16 +71,9 @@ input, textarea {
 }
 
 @keyframes flash-ripple {
-  0% {
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(3.5);
-    opacity: 0;
-  }
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(3.5); opacity: 0; }
 }
-
 .animate-ripple {
   animation: flash-ripple 0.35s ease-out forwards;
 }
@@ -89,7 +82,6 @@ input, textarea {
   transform: scale(0.95);
   transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
 .jelly-idle {
   transform: scale(1);
   transition: transform 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
