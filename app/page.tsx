@@ -7,10 +7,7 @@ import { SearchInput } from '@/components/ui/SearchInput';
 export default function Home() {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isInputActive, setIsInputActive] = useState(false);
-  const [plateTop, setPlateTop] = useState<number | null>(null);
-
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const ideasRef = useRef<HTMLDivElement>(null);
 
   const measureKeyboard = () => {
     const vv = window.visualViewport;
@@ -48,16 +45,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const updatePlatePosition = () => {
-      if (ideasRef.current) {
-        const rect = ideasRef.current.getBoundingClientRect();
-        setPlateTop(rect.top - 20);
-      }
-    };
-
-    updatePlatePosition();
-    window.addEventListener('resize', updatePlatePosition);
-
     const resetFocusState = () => {
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
@@ -100,7 +87,6 @@ export default function Home() {
     document.addEventListener('touchstart', preventPinch, { passive: false });
 
     return () => {
-      window.removeEventListener('resize', updatePlatePosition);
       window.removeEventListener('pageshow', resetFocusState);
       document.removeEventListener('visibilitychange', handleVisibility);
       vv.removeEventListener('resize', handleViewport);
@@ -140,13 +126,13 @@ export default function Home() {
     <main className="fixed inset-0 w-full h-[100dvh] bg-[#0a0a0a] overflow-hidden">
       
       <div 
-        className="fixed left-0 right-0 bottom-0 bg-[var(--plate-bg)] z-0 pointer-events-none"
-        style={{ top: plateTop !== null ? `${plateTop}px` : 'calc(50vh - 160px)' }}
+        className="absolute inset-x-0 bottom-0 bg-[#18181A] pointer-events-none z-0"
+        style={{ top: 'calc(50% - 165px)' }}
       >
         <img
           src="/clouds.png"
           alt="Clouds"
-          className="absolute bottom-full left-0 w-full h-auto pointer-events-none select-none block"
+          className="absolute bottom-full left-0 w-full h-auto object-cover pointer-events-none block"
         />
       </div>
 
@@ -181,10 +167,7 @@ export default function Home() {
           isBlurred ? 'opacity-30 blur-[8px]' : 'opacity-100 blur-none'
         }`}
       >
-        <div 
-          ref={ideasRef}
-          className="w-full flex flex-col items-start pointer-events-auto"
-        >
+        <div className="w-full flex flex-col items-start pointer-events-auto">
           <h2 className="text-white text-[19px] font-bold tracking-tight mb-3 px-1 text-left">
             Идеи, которые вдохновляют
           </h2>
