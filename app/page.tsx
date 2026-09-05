@@ -6,6 +6,7 @@ import { SearchInput } from '@/components/ui/SearchInput';
 
 export default function Home() {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isInputActive, setIsInputActive] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const measureKeyboard = () => {
@@ -28,11 +29,19 @@ export default function Home() {
   };
 
   const handleInputFocus = () => {
+    setIsInputActive(true);
     startPolling();
   };
 
   const handleInputBlur = () => {
+    setIsInputActive(false);
     startPolling();
+  };
+
+  const handleDismiss = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
   };
 
   useEffect(() => {
@@ -72,29 +81,44 @@ export default function Home() {
       id: 1,
       title: 'Случайная идея',
       text: 'Это текст идеи, в будущем разраб обязательно нас добавит',
+      tilt: '-rotate-[1.5deg]',
     },
     {
       id: 2,
       title: 'Случайная идея',
       text: 'Это текст идеи, в будущем разраб обязательно нас добавит',
+      tilt: 'rotate-[1.8deg]',
     },
     {
       id: 3,
       title: 'Случайная идея',
       text: 'Это текст идеи, в будущем разраб обязательно нас добавит',
+      tilt: 'rotate-[1.2deg]',
     },
     {
       id: 4,
       title: 'Случайная идея',
       text: 'Это текст идеи, в будущем разраб обязательно нас добавит',
+      tilt: '-rotate-[1.6deg]',
     },
   ];
+
+  const isBlurred = isInputActive || keyboardHeight > 0;
 
   return (
     <main className="fixed inset-0 w-full h-[100dvh] bg-[#0a0a0a] overflow-hidden">
       
+      {isBlurred && (
+        <div
+          onClick={handleDismiss}
+          className="fixed inset-0 z-20 bg-black/25 backdrop-blur-md transition-opacity duration-300 pointer-events-auto"
+        />
+      )}
+
       <div 
-        className="fixed left-0 right-0 px-5 z-20 flex justify-start items-center pointer-events-none"
+        className={`fixed left-0 right-0 px-5 z-10 flex justify-start items-center pointer-events-none transition-all duration-300 ${
+          isBlurred ? 'opacity-30 blur-[6px]' : 'opacity-100 blur-none'
+        }`}
         style={{ top: 'calc(env(safe-area-inset-top, 44px) + 14px)' }}
       >
         <JellyButton
@@ -110,7 +134,11 @@ export default function Home() {
         </JellyButton>
       </div>
 
-      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[420px] px-5 z-10 pointer-events-none">
+      <div 
+        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[420px] px-5 z-10 pointer-events-none transition-all duration-300 ${
+          isBlurred ? 'opacity-30 blur-[8px]' : 'opacity-100 blur-none'
+        }`}
+      >
         <div className="w-full flex flex-col items-start pointer-events-auto">
           <h2 className="text-white text-[19px] font-bold tracking-tight mb-3 px-1 text-left">
             Идеи, которые вдохновляют
@@ -120,16 +148,14 @@ export default function Home() {
             {ideas.map((item) => (
               <div
                 key={item.id}
-                className="w-full h-[116px] rounded-[24px] mt-glass p-3 flex flex-col justify-between shadow-sm cursor-pointer active:scale-[0.97] transition-transform"
+                className={`w-full h-[116px] rounded-[24px] mt-glass p-3 flex flex-col justify-between shadow-sm cursor-pointer active:scale-[0.97] transition-transform ${item.tilt}`}
               >
-                <div className="w-full flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                    <img
-                      src="/idea.png"
-                      alt="Idea"
-                      className="w-3.5 h-3.5 object-contain brightness-0 invert opacity-90 pointer-events-none"
-                    />
-                  </div>
+                <div className="w-full flex items-center gap-1.5">
+                  <img
+                    src="/idea.png"
+                    alt="Idea"
+                    className="w-4 h-4 object-contain brightness-0 invert opacity-90 shrink-0 pointer-events-none"
+                  />
                   <span className="text-white text-[13px] font-bold tracking-tight leading-tight flex-1 text-left">
                     {item.title}
                   </span>
@@ -149,7 +175,7 @@ export default function Home() {
         style={{ 
           bottom: keyboardHeight > 0 
             ? `${keyboardHeight + 6}px` 
-            : 'calc(env(safe-area-inset-bottom, 0px) + 2px)'
+            : '10px'
         }}
       >
         <div className="w-full max-w-[420px] mx-auto pointer-events-auto">
