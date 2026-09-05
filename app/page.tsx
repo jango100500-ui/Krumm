@@ -182,4 +182,28 @@ export default function Home() {
                   </span>
                 </div>
 
-                <p className="
+                <p className="text-white/50 text-[11px] font-normal leading-snug tracking-tight text-left">
+                  {item.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div 
+        className="fixed left-0 right-0 px-5 z-30 pointer-events-none transition-[bottom] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{ 
+          bottom: keyboardHeight > 0 
+            ? `${keyboardHeight + 6}px` 
+            : '10px'
+        }}
+      >
+        <div className="w-full max-w-[420px] mx-auto pointer-events-auto">
+          <SearchInput onFocus={handleInputFocus} onBlur={handleInputBlur} />
+        </div>
+      </div>
+
+    </main>
+  );
+}
