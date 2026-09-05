@@ -4,9 +4,10 @@
 
 :root {
   --glass-blur: blur(40px) saturate(180%);
-  --glass-border: 0.5px solid rgba(255, 255, 255, 0.12);
-  --glass-bg: rgba(255, 255, 255, 0.085);
+  --glass-border: 0.5px solid rgba(255, 255, 255, 0.45);
+  --glass-bg: rgba(255, 255, 255, 0.45);
   --hub-bg: #0a0a0a;
+  --plate-bg: #18181a;
 }
 
 * {
