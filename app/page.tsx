@@ -126,7 +126,7 @@ export default function Home() {
     <main className="fixed inset-0 w-full h-[100dvh] bg-[#0a0a0a] overflow-hidden">
       
       <div 
-        className="absolute inset-x-0 bottom-0 bg-[#18181A] pointer-events-none z-0"
+        className="absolute inset-x-0 bottom-[-80px] bg-[#1A1A1C] pointer-events-none z-0"
         style={{ top: 'calc(50% - 165px)' }}
       >
         <img
