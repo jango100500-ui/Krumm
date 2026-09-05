@@ -4,7 +4,7 @@
 
 :root {
   --glass-blur: blur(40px) saturate(180%);
-  --glass-border: 0.85px solid rgba(255, 255, 255, 0.15);
+  --glass-border: 0.85px solid rgba(255, 255, 255, 0.22);
   --glass-bg: rgba(255, 255, 255, 0.1);
   --hub-bg: #0a0a0a;
 }
@@ -45,7 +45,7 @@ img {
   -webkit-touch-callout: none;
 }
 
-input {
+input, textarea {
   user-select: auto;
   -webkit-user-select: auto;
 }
